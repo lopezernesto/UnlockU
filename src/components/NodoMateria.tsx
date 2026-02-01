@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
 import type { MateriaData, EstadoMateria } from "../types/Materia";
 import { Award, CircleCheck, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import ModalEditarMateria from "./ModalEditarMateria";
 
 interface MateriaNodeProps {
   data: MateriaData & {
     actualizar: (id: string, estado: EstadoMateria) => void;
     borrar: (id: string) => void;
     editar: (id: string, nuevosDatos: Partial<MateriaData>) => void;
+    todasLasMaterias: MateriaData[];
+    obtenerMateriasPrevias: (anio: number, cuatri: number) => MateriaData[];
   };
 }
 
@@ -15,6 +18,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
   //Logicas para girar y para la animacion de materia desbloqueada
   const [isFlipped, setIsFlipped] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [modalAbierto, setModalAbierto] = useState(false);
 
   //Handlers de edicion y borrado
   const handleBorrar = (e: React.MouseEvent) => {
@@ -26,7 +30,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
 
   const handleEditar = (e: React.MouseEvent) => {
     e.stopPropagation();
-    //data.abrirEdicion(data); // Paso toda la data al sidebar de edición
+    setModalAbierto(true);
   };
 
   // Efecto para cuando habilitas una materia
@@ -199,6 +203,16 @@ export function MateriaNode({ data }: MateriaNodeProps) {
         position={Position.Bottom}
         className="w-2 h-2 opacity-0"
       />
+
+      {modalAbierto && (
+        <ModalEditarMateria
+          materia={data} // Pasamos data directamente porque ya sabemos que está abierto
+          onClose={() => setModalAbierto(false)}
+          onGuardar={data.editar}
+          obtenerMateriasPrevias={data.obtenerMateriasPrevias}
+          todasLasMaterias={data.todasLasMaterias}
+        />
+      )}
     </div>
   );
 }

@@ -13,7 +13,7 @@ import { materiasIniciales } from "../data/MateriasIniciales";
 import type { EstadoMateria, MateriaData } from "../types/Materia";
 
 export default function useMaterias() {
-  // localStorage.clear(); //para hacer pruebas borrando todo
+  //localStorage.clear(); //para hacer pruebas borrando todo
   //Este useMemo se utiliza para que se ReactFlow no re-renderice los nodos innecesariamente cuando hay algun cambio en el estado
   const nodeTypes = useMemo(
     () => ({ materia: MateriaNode, anioTitulo: AnioNode }),
@@ -168,7 +168,14 @@ export default function useMaterias() {
       extent: "parent" as const,
       position:
         posicionesGuardadas[m.id] || calcularPosicionRelativa(m, materias),
-      data: { ...m, actualizar: actualizarEstado, borrar: borrarMateria },
+      data: {
+        ...m,
+        actualizar: actualizarEstado,
+        borrar: borrarMateria,
+        editar: editarMateria,
+        todasLasMaterias: materias,
+        obtenerMateriasPrevias,
+      },
     }));
 
     setNodos([...estructura, ...nodosMaterias]);
@@ -211,16 +218,58 @@ export default function useMaterias() {
   const editarMateria = useCallback(
     (id: string, dataActualizada: Partial<MateriaData>) => {
       setMaterias((prev) => {
-        const nuevas = prev.map((m) =>
-          m.id === id ? { ...m, ...dataActualizada } : m,
-        );
+        const materiaOriginal = prev.find((m) => m.id === id);
+        if (!materiaOriginal) return prev;
+
+        const materiaEditada = { ...materiaOriginal, ...dataActualizada };
+
+        // Verifico si cambio de año o cuatri
+        const cambioUbicacion =
+          materiaEditada.anio !== materiaOriginal.anio ||
+          materiaEditada.cuatrimestre !== materiaOriginal.cuatrimestre;
+
+        let nuevas = prev.map((m) => (m.id === id ? materiaEditada : m));
+
+        // Si cambio de ubicacion, verifico las correlativas de las demas materias
+        if (cambioUbicacion) {
+          nuevas = nuevas.map((materia) => {
+            // Si esta materia NO tiene a la editada como correlativa, no hacer nada
+            const tieneComoCorrelativa =
+              materia.correlativasCursada.includes(id) ||
+              materia.correlativasFinal.includes(id);
+
+            if (!tieneComoCorrelativa) return materia;
+
+            // Verifico que la materia editada siga siendo valida como correlativa
+            const esCorrelativaValida =
+              materiaEditada.anio < materia.anio ||
+              (materiaEditada.anio === materia.anio &&
+                materiaEditada.cuatrimestre < materia.cuatrimestre);
+
+            // Si no es valida, limpio las correlativas
+            if (!esCorrelativaValida) {
+              return {
+                ...materia,
+                correlativasCursada: materia.correlativasCursada.filter(
+                  (corrId) => corrId !== id,
+                ),
+                correlativasFinal: materia.correlativasFinal.filter(
+                  (corrId) => corrId !== id,
+                ),
+              };
+            }
+
+            return materia;
+          });
+        }
+
         return recalcularEstados(nuevas);
       });
     },
     [],
   );
 
-  // Para el filtro de materias en el Sidebar
+  // Para el filtro de materias en el Sidebar, solo mostrara materias que pueden ser correlativas
   const obtenerMateriasPrevias = (anio: number, cuatri: number) => {
     return materias.filter(
       (m) => m.anio < anio || (m.anio === anio && m.cuatrimestre < cuatri),
@@ -283,6 +332,7 @@ export default function useMaterias() {
     onEdgesChange,
     resetearPosiciones,
     agregarMateria,
+    editarMateria,
     obtenerMateriasPrevias,
     materias,
   };
