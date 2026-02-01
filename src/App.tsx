@@ -23,13 +23,12 @@ export default function App() {
     obtenerMateriasPrevias,
     materias,
   } = useMaterias();
-  // Recupera el viewport guardado o usa uno por defecto
+
   const initialViewport: Viewport = JSON.parse(
     localStorage.getItem("react-flow-viewport") ||
       '{"x": 350, "y": 60, "zoom": 0.8}',
   );
 
-  // Guarda la posición de la cámara y el zoom al terminar de moverlo
   const onMoveEnd = useCallback((_: any, viewport: Viewport) => {
     localStorage.setItem("react-flow-viewport", JSON.stringify(viewport));
   }, []);

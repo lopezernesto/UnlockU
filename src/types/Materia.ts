@@ -11,6 +11,4 @@ export interface MateriaData {
   anioFinal?: string;
   correlativasCursada: string[];
   correlativasFinal: string[];
-  // Agregar esta línea para cumplir con Record<string, unknown>
-  [key: string]: unknown;
 }

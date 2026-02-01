@@ -13,7 +13,7 @@ import { materiasIniciales } from "../data/MateriasIniciales";
 import type { EstadoMateria, MateriaData } from "../types/Materia";
 
 export default function useMaterias() {
-  //  localStorage.clear(); //para hacer pruebas borrando todo
+  // localStorage.clear(); //para hacer pruebas borrando todo
   //Este useMemo se utiliza para que se ReactFlow no re-renderice los nodos innecesariamente cuando hay algun cambio en el estado
   const nodeTypes = useMemo(
     () => ({ materia: MateriaNode, anioTitulo: AnioNode }),
@@ -116,6 +116,7 @@ export default function useMaterias() {
           (anio - 1) *
           (ESPACIO_VERTICAL_CUATRIMESTRE * 2 + ESPACIO_VERTICAL_AÑO + 150);
 
+        //Esta estructura es del fondo y titulo del año
         estructura.push({
           id: `year-group-${anio}`,
           type: "group",
@@ -126,7 +127,7 @@ export default function useMaterias() {
             width: anchoDinamico,
             height: 680,
             backgroundColor: "rgba(255, 255, 255, 0.03)", // Fondo casi invisible
-            //backdropFilter: "blur(4px)", // Difumina los puntitos del fondo
+            backdropFilter: "blur(4px)", // Difumina los puntitos del fondo
             borderRadius: "24px",
             border: "1px solid rgba(255, 255, 255, 0.08)", // Borde suave
             boxShadow: "0 8px 32px 0 rgba(61, 58, 58, 0.37)", // Sombra para separar del fondo
@@ -205,6 +206,19 @@ export default function useMaterias() {
     delete posiciones[idABorrar];
     localStorage.setItem("nodos-posiciones", JSON.stringify(posiciones));
   };
+
+  //Editar
+  const editarMateria = useCallback(
+    (id: string, dataActualizada: Partial<MateriaData>) => {
+      setMaterias((prev) => {
+        const nuevas = prev.map((m) =>
+          m.id === id ? { ...m, ...dataActualizada } : m,
+        );
+        return recalcularEstados(nuevas);
+      });
+    },
+    [],
+  );
 
   // Para el filtro de materias en el Sidebar
   const obtenerMateriasPrevias = (anio: number, cuatri: number) => {

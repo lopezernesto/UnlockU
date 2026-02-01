@@ -7,6 +7,7 @@ interface MateriaNodeProps {
   data: MateriaData & {
     actualizar: (id: string, estado: EstadoMateria) => void;
     borrar: (id: string) => void;
+    editar: (id: string, nuevosDatos: Partial<MateriaData>) => void;
   };
 }
 
@@ -15,6 +16,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
 
+  //Handlers de edicion y borrado
   const handleBorrar = (e: React.MouseEvent) => {
     e.stopPropagation(); // Evita que se disparen eventos del nodo
     if (window.confirm(`¿Seguro que querés borrar ${data.nombre}?`)) {
@@ -43,7 +45,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
     APROBADA: "bg-emerald-600 border-emerald-900 text-white",
   };
 
-  //Para los botones
+  //Logica para los botones de cambio de estado
   const regularizarMateria = (e: React.MouseEvent) => {
     e.stopPropagation(); // Evita que voltee la carta
     if (data.estado === "HABILITADA") {
