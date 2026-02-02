@@ -170,7 +170,9 @@ export default function useMaterias() {
         posicionesGuardadas[m.id] || calcularPosicionRelativa(m, materias),
       data: {
         ...m,
-        actualizar: actualizarEstado,
+        regularizar: regularizarMateria,
+        aprobar: aprobarFinal,
+        resetear: resetearMateria,
         borrar: borrarMateria,
         editar: editarMateria,
         todasLasMaterias: materias,
@@ -186,6 +188,50 @@ export default function useMaterias() {
     calcularPosicionRelativa,
     generarArcosAutomaticos,
   ]);
+  // Funciones para modificar el estado de las materias
+  const regularizarMateria = useCallback((id: string, anio: string) => {
+    setMaterias((prev) => {
+      const nuevas = prev.map((m) =>
+        m.id === id
+          ? { ...m, estado: "CURSADA" as EstadoMateria, anioCursada: anio }
+          : m,
+      );
+      return recalcularEstados(nuevas);
+    });
+  }, []);
+
+  const aprobarFinal = useCallback((id: string, anio: string, nota: number) => {
+    setMaterias((prev) => {
+      const nuevas = prev.map((m) =>
+        m.id === id
+          ? {
+              ...m,
+              estado: "APROBADA" as EstadoMateria,
+              anioFinal: anio,
+              nota: nota,
+            }
+          : m,
+      );
+      return recalcularEstados(nuevas);
+    });
+  }, []);
+
+  const resetearMateria = useCallback((id: string) => {
+    setMaterias((prev) => {
+      const nuevas = prev.map((m) =>
+        m.id === id
+          ? {
+              ...m,
+              estado: "BLOQUEADA" as EstadoMateria,
+              anioCursada: undefined,
+              anioFinal: undefined,
+              nota: undefined,
+            }
+          : m,
+      );
+      return recalcularEstados(nuevas);
+    });
+  }, []);
 
   // ABM DE MATERIAS
   // Agregar
@@ -193,7 +239,7 @@ export default function useMaterias() {
     setMaterias((prev) => [...prev, nuevaMateria]);
   };
   // Borrar
-  const borrarMateria = (idABorrar: string) => {
+  const borrarMateria = useCallback((idABorrar: string) => {
     setMaterias((prevMaterias) => {
       const listaSinMateria = prevMaterias.filter((m) => m.id !== idABorrar);
       const listaLimpia = listaSinMateria.map((materia) => ({
@@ -212,7 +258,7 @@ export default function useMaterias() {
     );
     delete posiciones[idABorrar];
     localStorage.setItem("nodos-posiciones", JSON.stringify(posiciones));
-  };
+  }, []);
 
   //Editar
   const editarMateria = useCallback(
@@ -278,23 +324,8 @@ export default function useMaterias() {
 
   const resetearPosiciones = useCallback(() => {
     localStorage.removeItem("nodos-posiciones");
-    setMaterias([...materias]); // Al resetear materias, el useEffect recalcula posiciones
+    setMaterias([...materias]);
   }, [materias]);
-
-  //Para modificar el estado de las materias
-
-  //Actualizar estado se llama cuando se aprueba/cursa/resetea una materia
-  const actualizarEstado = useCallback(
-    (id: string, nuevoEstado: EstadoMateria) => {
-      setMaterias((prev) => {
-        const nuevas = prev.map((m) =>
-          m.id === id ? { ...m, estado: nuevoEstado } : m,
-        );
-        return recalcularEstados(nuevas);
-      });
-    },
-    [],
-  );
 
   const recalcularEstados = (lista: MateriaData[]): MateriaData[] => {
     return lista.map((m) => {
@@ -332,7 +363,6 @@ export default function useMaterias() {
     onEdgesChange,
     resetearPosiciones,
     agregarMateria,
-    editarMateria,
     obtenerMateriasPrevias,
     materias,
   };

@@ -1,12 +1,22 @@
 import { useEffect, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
-import type { MateriaData, EstadoMateria } from "../types/Materia";
+import type { MateriaData } from "../types/Materia";
 import { Award, CircleCheck, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import ModalEditarMateria from "./ModalEditarMateria";
+import { ModalConfirmar } from "./ModalConfirmacion";
+import { ModalAccionEstado } from "./ModalEstadoMateria";
+export type TipoModal =
+  | "BORRAR"
+  | "REINICIAR"
+  | "REGULARIZAR"
+  | "APROBAR"
+  | null;
 
 interface MateriaNodeProps {
   data: MateriaData & {
-    actualizar: (id: string, estado: EstadoMateria) => void;
+    regularizar: (id: string, anio: string) => void;
+    aprobar: (id: string, anio: string, nota: number) => void;
+    resetear: (id: string) => void;
     borrar: (id: string) => void;
     editar: (id: string, nuevosDatos: Partial<MateriaData>) => void;
     todasLasMaterias: MateriaData[];
@@ -18,20 +28,8 @@ export function MateriaNode({ data }: MateriaNodeProps) {
   //Logicas para girar y para la animacion de materia desbloqueada
   const [isFlipped, setIsFlipped] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
-  const [modalAbierto, setModalAbierto] = useState(false);
-
-  //Handlers de edicion y borrado
-  const handleBorrar = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Evita que se disparen eventos del nodo
-    if (window.confirm(`¿Seguro que querés borrar ${data.nombre}?`)) {
-      data.borrar(data.id);
-    }
-  };
-
-  const handleEditar = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setModalAbierto(true);
-  };
+  const [modalEdicion, setModalEdicion] = useState(false);
+  const [modalEstados, setModalEstados] = useState<TipoModal>(null);
 
   // Efecto para cuando habilitas una materia
   useEffect(() => {
@@ -47,28 +45,6 @@ export function MateriaNode({ data }: MateriaNodeProps) {
     HABILITADA: `bg-blue-600 border-blue-900 text-white ${isUnlocking ? "animate-pulse shadow-[0_0_20px_rgba(37,99,235,0.8)]" : ""}`,
     CURSADA: "bg-amber-500 border-amber-700 text-black",
     APROBADA: "bg-emerald-600 border-emerald-900 text-white",
-  };
-
-  //Logica para los botones de cambio de estado
-  const regularizarMateria = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Evita que voltee la carta
-    if (data.estado === "HABILITADA") {
-      data.actualizar(data.id, "CURSADA");
-    }
-  };
-
-  const aprobarFinal = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (data.estado === "CURSADA") {
-      data.actualizar(data.id, "APROBADA");
-    }
-  };
-
-  const resetearMateria = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (data.estado === "CURSADA" || data.estado === "APROBADA") {
-      data.actualizar(data.id, "HABILITADA");
-    }
   };
 
   return (
@@ -90,14 +66,17 @@ export function MateriaNode({ data }: MateriaNodeProps) {
           {/* Botones de borrar y editar */}
           <div className="absolute -top-10 right-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
-              onClick={handleEditar}
+              onClick={(e) => {
+                e.stopPropagation();
+                setModalEdicion(true);
+              }}
               className="bg-slate-800 p-2 rounded-lg border border-white/10 text-blue-400 hover:bg-blue-600 hover:text-white transition-all shadow-lg"
               title="Editar"
             >
               <Pencil size={14} />
             </button>
             <button
-              onClick={handleBorrar}
+              onClick={() => setModalEstados("BORRAR")}
               className="bg-slate-800 p-2 rounded-lg border border-white/10 text-rose-400 hover:bg-rose-600 hover:text-white transition-all shadow-lg"
               title="Borrar"
             >
@@ -117,7 +96,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
               <>
                 {/* Para cuando regularizas la materia */}
                 <button
-                  onClick={regularizarMateria}
+                  onClick={() => setModalEstados("REGULARIZAR")}
                   disabled={
                     data.estado === "CURSADA" || data.estado === "APROBADA"
                   }
@@ -135,7 +114,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
 
                 {/* Para cuando aprobas el final */}
                 <button
-                  onClick={aprobarFinal}
+                  onClick={() => setModalEstados("APROBAR")}
                   disabled={
                     data.estado === "HABILITADA" || data.estado === "APROBADA"
                   }
@@ -152,7 +131,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
 
                 {/* Para resetear la materia */}
                 <button
-                  onClick={resetearMateria}
+                  onClick={() => setModalEstados("REINICIAR")}
                   disabled={data.estado === "HABILITADA"}
                   className={`p-2 rounded transition-all duration-200 flex items-center justify-center
           ${
@@ -175,7 +154,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
 
         {/* Dorso de la carta */}
         <div
-          className={`absolute inset-0 backface-hidden rotate-y-180 flex flex-col p-4 text-sm rounded-lg border-4 shadow-xl ${colorClasses[data.estado]} cursor-pointer`}
+          className={`absolute inset-0 backface-hidden rotate-y-180  flex flex-col p-4 text-sm rounded-lg border-4 shadow-xl ${colorClasses[data.estado]} cursor-pointer`}
           onClick={() => setIsFlipped(!isFlipped)}
         >
           <h3 className="font-bold mb-3 text-center border-b pb-2">
@@ -204,13 +183,61 @@ export function MateriaNode({ data }: MateriaNodeProps) {
         className="w-2 h-2 opacity-0"
       />
 
-      {modalAbierto && (
+      {modalEdicion && (
         <ModalEditarMateria
-          materia={data} // Pasamos data directamente porque ya sabemos que está abierto
-          onClose={() => setModalAbierto(false)}
+          materia={data}
+          onClose={() => setModalEdicion(false)}
           onGuardar={data.editar}
           obtenerMateriasPrevias={data.obtenerMateriasPrevias}
           todasLasMaterias={data.todasLasMaterias}
+        />
+      )}
+
+      {/* Modal de borrar */}
+      {modalEstados === "BORRAR" && (
+        <ModalConfirmar
+          titulo="¿Eliminar Materia?"
+          mensaje={`Vas a borrar ${data.nombre}. Esta acción es permanente.`}
+          textoBoton="ELIMINAR"
+          colorBoton="bg-rose-600"
+          onConfirm={() => {
+            data.borrar(data.id);
+            setModalEstados(null);
+          }}
+          onClose={() => setModalEstados(null)}
+        />
+      )}
+
+      {/* Modal de reiniciar */}
+      {modalEstados === "REINICIAR" && (
+        <ModalConfirmar
+          titulo="¿Reiniciar Materia?"
+          mensaje="Volverá a estar bloqueada o disponible según sus correlativas."
+          textoBoton="REINICIAR"
+          colorBoton="bg-amber-500"
+          onConfirm={() => {
+            data.resetear(data.id);
+            setModalEstados(null);
+          }}
+          onClose={() => setModalEstados(null)}
+        />
+      )}
+
+      {/* Modal para regularizar o aprobar */}
+      {(modalEstados === "REGULARIZAR" || modalEstados === "APROBAR") && (
+        <ModalAccionEstado
+          tipo={modalEstados}
+          nombreMateria={data.nombre}
+          onConfirm={(res) => {
+            if (modalEstados === "REGULARIZAR") {
+              data.regularizar(data.id, res.anio);
+            } else {
+              if (res.nota !== undefined)
+                data.aprobar(data.id, res.anio, res.nota);
+            }
+            setModalEstados(null);
+          }}
+          onClose={() => setModalEstados(null)}
         />
       )}
     </div>
