@@ -52,26 +52,22 @@ export default function useMaterias() {
     (listaMaterias: MateriaData[]): Edge[] => {
       const nuevosArcos: Edge[] = [];
       listaMaterias.forEach((m) => {
-        // Arcos de Cursada
-        m.correlativasCursada.forEach((idPadre) => {
-          nuevosArcos.push({
-            id: `e-${idPadre}-${m.id}-cursada`,
-            source: idPadre,
-            target: m.id,
-            //label: "cursada",
-            style: { stroke: "#e20e0e" },
-            //animated: true,
-          });
+        const crearArco = (idPadre: string, esFinal: boolean) => ({
+          id: `e-${idPadre}-${m.id}-${esFinal ? "final" : "cursada"}`,
+          source: idPadre,
+          target: m.id,
+          style: {
+            stroke: "#94a3b8",
+            strokeDasharray: esFinal ? "5,5" : "0",
+          },
+          animated: esFinal ? true : false,
         });
-        // Arcos de Final
-        m.correlativasFinal.forEach((idPadre) => {
-          nuevosArcos.push({
-            id: `e-${idPadre}-${m.id}-final`,
-            source: idPadre,
-            target: m.id,
-            style: { stroke: "#cf1c1c", strokeDasharray: "5,5" },
-          });
-        });
+        m.correlativasCursada.forEach((idP) =>
+          nuevosArcos.push(crearArco(idP, false)),
+        );
+        m.correlativasFinal.forEach((idP) =>
+          nuevosArcos.push(crearArco(idP, true)),
+        );
       });
       return nuevosArcos;
     },

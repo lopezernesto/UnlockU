@@ -47,6 +47,16 @@ export function MateriaNode({ data }: MateriaNodeProps) {
     APROBADA: "bg-emerald-600 border-emerald-900 text-white",
   };
 
+  /*
+  const colorClasses = {
+  BLOQUEADA: "bg-slate-900/80 border-slate-800 text-slate-500",
+  HABILITADA: `bg-slate-900/80 border-cyan-500 text-cyan-400 ${
+    isUnlocking ? "animate-pulse shadow-[0_0_15px_rgba(6,182,212,0.4)]" : ""
+  }`,
+  CURSADA: "bg-slate-900/80 border-amber-500 text-amber-500",
+  APROBADA: "bg-slate-900/80 border-emerald-500 text-emerald-400",
+};
+  */
   return (
     <div className="group w-48 h-64 perspective-1000">
       {/* Conectores para las flechas */}
