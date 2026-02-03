@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 src/components/nota.tsx
+src/components/Arcos.tsx
 src/App.css
 
 # Editor directories and files

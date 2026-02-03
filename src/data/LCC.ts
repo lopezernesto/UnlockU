@@ -2,7 +2,8 @@
 import type { MateriaData } from "../types/Materia";
 
 export const materiasLCC: MateriaData[] = [
-  // ===== Primer año =====
+  ////////////////// PRIMER AÑO //////////////////
+  // ===== Primer Cuatrimestre =====
   {
     id: "1",
     nombre: "Elementos de Álgebra",
@@ -39,6 +40,7 @@ export const materiasLCC: MateriaData[] = [
     correlativasCursada: [],
     correlativasFinal: [],
   },
+  // ===== Segundo Cuatrimestre =====
   {
     id: "5",
     nombre: "Desarrollo de Algoritmos",
@@ -76,7 +78,8 @@ export const materiasLCC: MateriaData[] = [
     correlativasFinal: [],
   },
 
-  // ===== Segundo año =====
+  ////////////////// SEGUNDO AÑO //////////////////
+  // ===== Primer Cuatrimestre =====
   {
     id: "9",
     nombre: "Cálculo Diferencial e Integral",
@@ -122,6 +125,7 @@ export const materiasLCC: MateriaData[] = [
     correlativasCursada: ["3", "4"],
     correlativasFinal: [],
   },
+  // ===== Segundo Cuatrimestre =====
   {
     id: "14",
     nombre: "Métodos Computacionales para el Cálculo",
@@ -177,7 +181,8 @@ export const materiasLCC: MateriaData[] = [
     correlativasFinal: [],
   },
 
-  // ===== Tercer año =====
+  ////////////////// TERCER AÑO //////////////////
+  // ===== Primer Cuatrimestre =====
   {
     id: "20",
     nombre: "Probabilidad y Estadística",
@@ -223,6 +228,7 @@ export const materiasLCC: MateriaData[] = [
     correlativasCursada: ["11", "18", "19"],
     correlativasFinal: [],
   },
+  // ===== Segundo Cuatrimestre =====
   {
     id: "25",
     nombre: "Análisis de Algoritmos",
@@ -278,7 +284,8 @@ export const materiasLCC: MateriaData[] = [
     correlativasFinal: ["18"],
   },
 
-  // ===== Cuarto año =====
+  ////////////////// CUARTO AÑO //////////////////
+  // ===== Primer Cuatrimestre =====
   {
     id: "31",
     nombre: "Lenguajes Declarativos",
@@ -315,6 +322,7 @@ export const materiasLCC: MateriaData[] = [
     correlativasCursada: ["29"],
     correlativasFinal: ["23", "24"],
   },
+  // ===== Segundo Cuatrimestre =====
   {
     id: "35",
     nombre: "Diseño de Algoritmos",
@@ -360,8 +368,9 @@ export const materiasLCC: MateriaData[] = [
     correlativasCursada: ["24", "26", "28"],
     correlativasFinal: [],
   },
+  ////////////////// QUINTO AÑO //////////////////
 
-  // ===== Quinto año =====
+  // ===== Primer Cuatrimestre =====
   {
     id: "40",
     nombre: "Sistemas Inteligentes",
@@ -398,6 +407,7 @@ export const materiasLCC: MateriaData[] = [
     correlativasCursada: ["33"],
     correlativasFinal: ["22", "28"],
   },
+  // ===== Segundo Cuatrimestre =====
   {
     id: "44",
     nombre: "Laboratorio de Compiladores e Intérpretes",
