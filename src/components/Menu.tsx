@@ -11,6 +11,7 @@ interface Props {
   exportarProgreso: () => void;
   importarProgreso: (file: File) => void;
   cargarLCC: () => void;
+  cargarADYSL: () => void;
 }
 
 export default function Menu({
@@ -20,6 +21,7 @@ export default function Menu({
   importarProgreso,
   exportarProgreso,
   cargarLCC,
+  cargarADYSL,
 }: Props) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [configModal, setConfigModal] = useState<{
@@ -55,6 +57,22 @@ export default function Menu({
               LCC
             </span>
           </button>
+          <button
+            onClick={() =>
+              setConfigModal({
+                titulo: "Cargar Tecnicatura ADSL",
+                color: "bg-purple-600 hover:bg-purple-500",
+                accion: () => cargarADYSL(),
+              })
+            }
+            className="text-white/60 hover:text-cyan-400 transition-colors flex flex-col items-center gap-1 group"
+          >
+            <Library size={20} />
+            <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+              Tec. ADYSL
+            </span>
+          </button>
+
           <button
             onClick={exportarProgreso}
             className="text-white/60 hover:text-blue-400 transition-colors flex flex-col items-center gap-1 group"

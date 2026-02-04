@@ -25,6 +25,7 @@ export default function App() {
     importarProgreso,
     exportarProgreso,
     cargarCarreraLCC,
+    cargarTecnicaturaADYSL,
     resetKey,
   } = useMaterias();
 
@@ -74,6 +75,7 @@ export default function App() {
           exportarProgreso={exportarProgreso}
           importarProgreso={importarProgreso}
           cargarLCC={cargarCarreraLCC}
+          cargarADYSL={cargarTecnicaturaADYSL}
         />
       </ReactFlow>
     </div>

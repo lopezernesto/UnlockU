@@ -12,6 +12,7 @@ import { AnioNode } from "../components/Separador";
 import { materiasIniciales } from "../data/MateriasIniciales";
 import { materiasLCC } from "../data/LCC";
 import type { EstadoMateria, MateriaData } from "../types/Materia";
+import { materiasTUADYSL } from "../data/TUADYSL";
 
 export default function useMaterias() {
   //localStorage.clear(); //para hacer pruebas borrando todo
@@ -357,6 +358,16 @@ export default function useMaterias() {
       setMaterias(materiasLCC);
     }, 0);
   }, []);
+  const cargarTecnicaturaADYSL = useCallback(() => {
+    localStorage.removeItem("nodos-posiciones");
+    localStorage.removeItem("react-flow-viewport");
+    setNodos([]);
+    setArcos([]);
+    setResetKey((prev) => prev + 1);
+    setTimeout(() => {
+      setMaterias(materiasTUADYSL);
+    }, 0);
+  }, []);
 
   const importarProgreso = useCallback((file: File) => {
     const reader = new FileReader();
@@ -433,6 +444,7 @@ export default function useMaterias() {
     importarProgreso,
     exportarProgreso,
     cargarCarreraLCC,
+    cargarTecnicaturaADYSL,
     resetKey,
   };
 }
