@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, use } from "react";
 import {
   applyEdgeChanges,
   applyNodeChanges,
@@ -83,9 +83,12 @@ export default function useMaterias() {
   // ABM DE MATERIAS
 
   // Agregar
-  const agregarMateria = (nuevaMateria: MateriaData) => {
-    setMaterias((prev) => [...prev, nuevaMateria]);
-  };
+  const agregarMateria = useCallback((nuevaMateria: MateriaData) => {
+    setMaterias((prev) => {
+      const nuevaLista = [...prev, nuevaMateria];
+      return recalcularEstados(nuevaLista);
+    });
+  }, []);
   // Borrar
   const borrarMateria = useCallback((idABorrar: string) => {
     setMaterias((prevMaterias) => {

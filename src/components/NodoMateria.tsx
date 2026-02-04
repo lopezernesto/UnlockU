@@ -243,7 +243,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
             {data.nombre}
           </h3>
 
-          {data.estado === "BLOQUEADA" && (
+          {(data.estado === "BLOQUEADA" || data.estado === "HABILITADA") && (
             <div className="flex-1 overflow-y-auto space-y-2 text-[10px] leading-tight">
               {/* Correlativas para cursar */}
               {data.correlativasCursada.length > 0 && (
@@ -314,7 +314,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
               )}
             </div>
           )}
-          {data.estado !== "BLOQUEADA" && (
+          {data.estado !== "BLOQUEADA" && data.estado !== "HABILITADA" && (
             <div className="space-y-2 flex-1">
               <p>
                 <strong>Año cursada:</strong> {data.anioCursada || "--"}
