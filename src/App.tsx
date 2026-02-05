@@ -7,6 +7,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import useMaterias from "./hooks/useMaterias";
+import useCarrera from "./hooks/useCarrera";
 import { LayoutGrid } from "lucide-react";
 import Menu from "./components/Menu";
 import Header from "./components/Header";
@@ -14,6 +15,18 @@ import MensajeBienvenida from "./components/Bienvenida";
 import { useCallback } from "react";
 
 export default function App() {
+  const {
+    carreraActual,
+    materias,
+    aniosDuracion,
+    resetKey,
+    cambiarCarrera,
+    cargarCarreraLCC,
+    cargarTecnicaturaADYSL,
+    importarProgreso,
+    exportarProgreso,
+    actualizarMaterias,
+  } = useCarrera();
   const {
     nodos,
     arcos,
@@ -23,22 +36,18 @@ export default function App() {
     resetearPosiciones,
     agregarMateria,
     obtenerMateriasPrevias,
+  } = useMaterias({
     materias,
     aniosDuracion,
-    carreraActual,
-    cambiarCarrera,
-    importarProgreso,
-    exportarProgreso,
-    cargarCarreraLCC,
-    cargarTecnicaturaADYSL,
+    actualizarMaterias,
     resetKey,
-  } = useMaterias();
+  });
 
   const hayCarrera = carreraActual !== null;
 
   const initialViewport: Viewport = JSON.parse(
     localStorage.getItem("react-flow-viewport") ||
-      '{"x": 350, "y": 60, "zoom": 0.8}',
+      '{"x": 350, "y": 150, "zoom": 0.8}',
   );
 
   const onMoveEnd = useCallback((_: any, viewport: Viewport) => {

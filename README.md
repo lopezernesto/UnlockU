@@ -155,7 +155,8 @@ UnlockU/
 │   │   ├── ModalConfirmacion.tsx
 │   │   └── Separador.tsx    # Títulos de año
 │   ├── hooks/
-│   │   └── useMaterias.ts   # Lógica principal del estado
+│   │   ├── useCarrera.ts    # Lógica principal del estado
+│   │   └── useMaterias.ts   # Lógica de cada materia
 │   ├── types/
 │   │   ├── Carrera.ts
 │   │   └── Materia.ts

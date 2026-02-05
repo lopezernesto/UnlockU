@@ -9,12 +9,21 @@ import {
 } from "@xyflow/react";
 import { MateriaNode } from "../components/NodoMateria";
 import { AnioNode } from "../components/Separador";
-import { carreraLCC } from "../data/LCC";
 import type { EstadoMateria, MateriaData } from "../types/Materia";
-import { carreraTUADYSL } from "../data/TUADYSL";
-import type { CarreraData } from "../types/Carrera";
 
-export default function useMaterias() {
+interface useMateriasProps {
+  materias: MateriaData[];
+  aniosDuracion: number;
+  actualizarMaterias: (nuevasMaterias: MateriaData[]) => void;
+  resetKey: number;
+}
+
+export default function useMaterias({
+  materias,
+  aniosDuracion,
+  actualizarMaterias,
+  resetKey,
+}: useMateriasProps) {
   //localStorage.clear(); //para hacer pruebas borrando todo
   //Este useMemo se utiliza para que se ReactFlow no re-renderice los nodos innecesariamente cuando hay algun cambio en el estado
   const nodeTypes = useMemo(
@@ -28,24 +37,8 @@ export default function useMaterias() {
   const ESPACIO_VERTICAL_AÑO = 100;
 
   // --- Estados ---
-  const [carreraActual, setCarreraActual] = useState<CarreraData | null>(() => {
-    const guardado = localStorage.getItem("carrera-data");
-    return guardado ? JSON.parse(guardado) : null;
-  });
-
-  const materias = carreraActual?.materias ?? [];
-  const aniosDuracion = carreraActual?.aniosDuracion || 5;
-
   const [nodos, setNodos] = useState<Node[]>([]);
   const [arcos, setArcos] = useState<Edge[]>([]);
-  // Key para forzar reset completo cuando cambia el dataset
-  const [resetKey, setResetKey] = useState(0);
-
-  useEffect(() => {
-    if (carreraActual) {
-      localStorage.setItem("carrera-data", JSON.stringify(carreraActual));
-    }
-  }, [carreraActual]);
 
   // Handlers React Flow
   const onNodesChange: OnNodesChange<Node> = useCallback(
@@ -59,17 +52,10 @@ export default function useMaterias() {
 
   const setMaterias = useCallback(
     (updateFn: (prev: MateriaData[]) => MateriaData[]) => {
-      setCarreraActual((prev) => {
-        if (!prev) return null;
-
-        const nuevasMaterias = updateFn(prev.materias);
-        return {
-          ...prev,
-          materias: recalcularEstados(nuevasMaterias),
-        };
-      });
+      const nuevasMaterias = updateFn(materias);
+      actualizarMaterias(recalcularEstados(nuevasMaterias));
     },
-    [],
+    [materias, actualizarMaterias],
   );
 
   // Recalcular estados para corregir correlatividades
@@ -104,33 +90,39 @@ export default function useMaterias() {
   // ABM DE MATERIAS
 
   // Agregar
-  const agregarMateria = useCallback((nuevaMateria: MateriaData) => {
-    setMaterias((prev) => {
-      const nuevaLista = [...prev, nuevaMateria];
-      return recalcularEstados(nuevaLista);
-    });
-  }, []);
+  const agregarMateria = useCallback(
+    (nuevaMateria: MateriaData) => {
+      setMaterias((prev) => {
+        const nuevaLista = [...prev, nuevaMateria];
+        return recalcularEstados(nuevaLista);
+      });
+    },
+    [setMaterias],
+  );
   // Borrar
-  const borrarMateria = useCallback((idABorrar: string) => {
-    setMaterias((prevMaterias) => {
-      const listaSinMateria = prevMaterias.filter((m) => m.id !== idABorrar);
-      const listaLimpia = listaSinMateria.map((materia) => ({
-        ...materia,
-        correlativasCursada: materia.correlativasCursada.filter(
-          (id) => id !== idABorrar,
-        ),
-        correlativasFinal: materia.correlativasFinal.filter(
-          (id) => id !== idABorrar,
-        ),
-      }));
-      return recalcularEstados(listaLimpia);
-    });
-    const posiciones = JSON.parse(
-      localStorage.getItem("nodos-posiciones") || "{}",
-    );
-    delete posiciones[idABorrar];
-    localStorage.setItem("nodos-posiciones", JSON.stringify(posiciones));
-  }, []);
+  const borrarMateria = useCallback(
+    (idABorrar: string) => {
+      setMaterias((prevMaterias) => {
+        const listaSinMateria = prevMaterias.filter((m) => m.id !== idABorrar);
+        const listaLimpia = listaSinMateria.map((materia) => ({
+          ...materia,
+          correlativasCursada: materia.correlativasCursada.filter(
+            (id) => id !== idABorrar,
+          ),
+          correlativasFinal: materia.correlativasFinal.filter(
+            (id) => id !== idABorrar,
+          ),
+        }));
+        return recalcularEstados(listaLimpia);
+      });
+      const posiciones = JSON.parse(
+        localStorage.getItem("nodos-posiciones") || "{}",
+      );
+      delete posiciones[idABorrar];
+      localStorage.setItem("nodos-posiciones", JSON.stringify(posiciones));
+    },
+    [setMaterias],
+  );
 
   //Editar
   const editarMateria = useCallback(
@@ -184,52 +176,61 @@ export default function useMaterias() {
         return recalcularEstados(nuevas);
       });
     },
-    [],
+    [setMaterias],
   );
   // Funciones para modificar el estado de las materias
-  const regularizarMateria = useCallback((id: string, anio: string) => {
-    setMaterias((prev) => {
-      const nuevas = prev.map((m) =>
-        m.id === id
-          ? { ...m, estado: "CURSADA" as EstadoMateria, anioCursada: anio }
-          : m,
-      );
-      return recalcularEstados(nuevas);
-    });
-  }, []);
+  const regularizarMateria = useCallback(
+    (id: string, anio: string) => {
+      setMaterias((prev) => {
+        const nuevas = prev.map((m) =>
+          m.id === id
+            ? { ...m, estado: "CURSADA" as EstadoMateria, anioCursada: anio }
+            : m,
+        );
+        return recalcularEstados(nuevas);
+      });
+    },
+    [setMaterias],
+  );
 
-  const aprobarFinal = useCallback((id: string, anio: string, nota: number) => {
-    setMaterias((prev) => {
-      const nuevas = prev.map((m) =>
-        m.id === id
-          ? {
-              ...m,
-              estado: "APROBADA" as EstadoMateria,
-              anioFinal: anio,
-              nota: nota,
-            }
-          : m,
-      );
-      return recalcularEstados(nuevas);
-    });
-  }, []);
+  const aprobarFinal = useCallback(
+    (id: string, anio: string, nota: number) => {
+      setMaterias((prev) => {
+        const nuevas = prev.map((m) =>
+          m.id === id
+            ? {
+                ...m,
+                estado: "APROBADA" as EstadoMateria,
+                anioFinal: anio,
+                nota: nota,
+              }
+            : m,
+        );
+        return recalcularEstados(nuevas);
+      });
+    },
+    [setMaterias],
+  );
 
-  const resetearMateria = useCallback((id: string) => {
-    setMaterias((prev) => {
-      const nuevas = prev.map((m) =>
-        m.id === id
-          ? {
-              ...m,
-              estado: "BLOQUEADA" as EstadoMateria,
-              anioCursada: undefined,
-              anioFinal: undefined,
-              nota: undefined,
-            }
-          : m,
-      );
-      return recalcularEstados(nuevas);
-    });
-  }, []);
+  const resetearMateria = useCallback(
+    (id: string) => {
+      setMaterias((prev) => {
+        const nuevas = prev.map((m) =>
+          m.id === id
+            ? {
+                ...m,
+                estado: "BLOQUEADA" as EstadoMateria,
+                anioCursada: undefined,
+                anioFinal: undefined,
+                nota: undefined,
+              }
+            : m,
+        );
+        return recalcularEstados(nuevas);
+      });
+    },
+    [setMaterias],
+  );
 
   // Para el filtro de materias en el Sidebar, solo mostrara materias que pueden ser correlativas
   const obtenerMateriasPrevias = useCallback(
@@ -354,64 +355,11 @@ export default function useMaterias() {
   const resetearPosiciones = useCallback(() => {
     localStorage.removeItem("nodos-posiciones");
     setMaterias((prev) => [...prev]);
-  }, []);
-
-  const exportarProgreso = () => {
-    const dataStr = JSON.stringify(carreraActual, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(dataBlob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `progreso_lcc_${new Date().toISOString().slice(0, 10)}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const cargarCarreraLCC = useCallback(() => {
-    localStorage.removeItem("nodos-posiciones");
-    localStorage.removeItem("react-flow-viewport");
-    setNodos([]);
-    setArcos([]);
-    setResetKey((prev) => prev + 1);
-    setTimeout(() => {
-      setCarreraActual(carreraLCC);
-    }, 0);
-  }, []);
-  const cargarTecnicaturaADYSL = useCallback(() => {
-    localStorage.removeItem("nodos-posiciones");
-    localStorage.removeItem("react-flow-viewport");
-    setNodos([]);
-    setArcos([]);
-    setResetKey((prev) => prev + 1);
-    setTimeout(() => {
-      setCarreraActual(carreraTUADYSL);
-    }, 0);
-  }, []);
-
-  const importarProgreso = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const json = JSON.parse(e.target?.result as string);
-        localStorage.removeItem("nodos-posiciones");
-        localStorage.removeItem("react-flow-viewport");
-        setNodos([]);
-        setArcos([]);
-        setResetKey((prev) => prev + 1);
-        setTimeout(() => {
-          setCarreraActual(json);
-        }, 0);
-      } catch (err) {
-        alert("Error: El archivo no tiene un formato válido.");
-      }
-    };
-    reader.readAsText(file);
-  }, []);
+  }, [setMaterias]);
 
   // Efecto para sincronizar Arcos y Nodos cuando cambian las materias
   useEffect(() => {
-    if (!carreraActual || materias.length === 0) {
+    if (materias.length === 0) {
       setNodos([]);
       setArcos([]);
       return;
@@ -444,8 +392,8 @@ export default function useMaterias() {
     setNodos([...estructura, ...nodosMaterias]);
     setArcos(generarArcosAutomaticos(materias));
   }, [
-    carreraActual,
     materias,
+    aniosDuracion,
     resetKey,
     generarEstructuraDinamica,
     calcularPosicionRelativa,
@@ -458,18 +406,6 @@ export default function useMaterias() {
     obtenerMateriasPrevias,
   ]);
 
-  const cambiarCarrera = useCallback(() => {
-    localStorage.removeItem("nodos-posiciones");
-    localStorage.removeItem("react-flow-viewport");
-    localStorage.removeItem("carrera-data");
-    setNodos([]);
-    setArcos([]);
-    setResetKey((prev) => prev + 1);
-    setTimeout(() => {
-      setCarreraActual(null);
-    }, 0);
-  }, []);
-
   return {
     nodos,
     arcos,
@@ -479,14 +415,5 @@ export default function useMaterias() {
     resetearPosiciones,
     agregarMateria,
     obtenerMateriasPrevias,
-    materias,
-    aniosDuracion,
-    carreraActual,
-    cambiarCarrera,
-    importarProgreso,
-    exportarProgreso,
-    cargarCarreraLCC,
-    cargarTecnicaturaADYSL,
-    resetKey,
   };
 }
