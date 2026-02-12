@@ -143,36 +143,38 @@ npm run lint     # Ejecuta el linter
 
 ```
 UnlockU/
-├── src/
-│   ├── components/          # Componentes React
-│   │   ├── Menu.tsx         # Menú lateral con acciones
-│   │   ├── Bienvenida.tsx     #Para cuando no hay una carrera cargada
-│   │   ├── Header.tsx         # Nombre de la carrera + botones
-│   │   ├── NodoMateria.tsx  # Carta de materia individual
-│   │   ├── SidebarMateria.tsx    # Panel para agregar materias
-│   │   ├── ModalEditarMateria.tsx
-│   │   ├── ModalEstadoMateria.tsx
-│   │   ├── ModalConfirmacion.tsx
-│   │   └── Separador.tsx    # Títulos de año
-│   ├── hooks/
-│   │   ├── useCarrera.ts    # Lógica principal del estado
-│   │   └── useMaterias.ts   # Lógica de cada materia
-│   ├── types/
-│   │   ├── Carrera.ts
-│   │   └── Materia.ts
-│   ├── data/
-│   │   ├── LCC.ts           # Plan de LCC completo
-│   │   ├── TUADYSL.ts       # Plan de TUADYSL completo
-│   │   └── MateriasIniciales.ts  # Datos de prueba
-│   ├── App.tsx              # Componente principal
-│   ├── main.tsx             # Entry point
-│   └── index.css            # Estilos globales
-├── screenshots/
-├── public/
-├── index.html
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
+├── front/
+│   ├──src/
+│   │   ├── components/          # Componentes React
+│   │   │   ├── Menu.tsx         # Menú lateral con acciones
+│   │   │   ├── Bienvenida.tsx     #Para cuando no hay una carrera cargada
+│   │   │   ├── Header.tsx         # Nombre de la carrera + botones
+│   │   │   ├── NodoMateria.tsx  # Carta de materia individual
+│   │   │   ├── SidebarMateria.tsx    # Panel para agregar materias
+│   │   │   ├── ModalEditarMateria.tsx
+│   │   │   ├── ModalEstadoMateria.tsx
+│   │   │   ├── ModalConfirmacion.tsx
+│   │   │   └── Separador.tsx    # Títulos de año
+│   │   ├── hooks/
+│   │   │   ├── useCarrera.ts    # Lógica principal del estado
+│   │   │   └── useMaterias.ts   # Lógica de cada materia
+│   │   ├── types/
+│   │   │   ├── Carrera.ts
+│   │   │   └── Materia.ts
+│   │   ├── data/
+│   │   │   ├── LCC.ts           # Plan de LCC completo
+│   │   │   ├── TUADYSL.ts       # Plan de TUADYSL completo
+│   │   │   └── MateriasIniciales.ts  # Datos de prueba
+│   │   ├── App.tsx              # Componente principal
+│   │   ├── main.tsx             # Entry point
+│   │   └── index.css            # Estilos globales
+│   ├── screenshots/
+│   ├── public/
+│   ├── index.html
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+├── back/
 └── README.md
 ```
 

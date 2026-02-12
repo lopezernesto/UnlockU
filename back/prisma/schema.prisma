@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  googleId  String   @unique
+  email     String   @unique
+  nombre    String
+  foto      String?
+  creadoEn DateTime @default(now())
+
+  progresos      ProgresoMateria[]
+  carrerasCustom CarreraCustom[]
+  posiciones     PosicionNodo[]
+}
+
+model ProgresoMateria {
+  id        String        @id @default(cuid())
+  usuarioId String
+  carreraId String
+  materiaId String
+  estado    EstadoMateria
+  nota      Float?
+  fecha     DateTime?
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@unique([usuarioId, carreraId, materiaId])
+}
+
+model PosicionNodo {
+  id        String @id @default(cuid())
+  usuarioId String
+  carreraId String
+  materiaId String
+  x         Float
+  y         Float
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@unique([usuarioId, carreraId, materiaId])
+}
+
+model CarreraCustom {
+  id        String   @id @default(cuid())
+  usuarioId String
+  nombre    String
+  materias  Json
+  creadoEn DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+}
+
+enum EstadoMateria {
+  CURSADA
+  APROBADA
+}
