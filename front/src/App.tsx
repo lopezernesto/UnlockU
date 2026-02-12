@@ -15,7 +15,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Login from "./components/Login";
 import { useAuth } from "./hooks/useAuth";
-import UserAvatar from "./components/AvatarUsuario";
+import PanelUsuario from "./components/AvatarUsuario";
 import { CarreraProvider, useCarreraContext } from "./context/CarreraContext";
 
 const queryClient = new QueryClient({
@@ -86,7 +86,7 @@ function AppContent() {
     <div
       style={{ width: "100vw", height: "100vh", backgroundColor: "#000000" }}
     >
-      <UserAvatar user={user} onLogout={logout} />
+      <PanelUsuario user={user} onLogout={logout} />
       {!hayCarrera && <MensajeBienvenida />}
 
       {hayCarrera && <Header />}

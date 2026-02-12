@@ -144,20 +144,26 @@ npm run lint     # Ejecuta el linter
 ```
 UnlockU/
 ├── front/
-│   ├──src/
+│   ├── src/
 │   │   ├── components/          # Componentes React
-│   │   │   ├── Menu.tsx         # Menú lateral con acciones
+│   │   │   ├── PanelUsuario.tsx
 │   │   │   ├── Bienvenida.tsx     #Para cuando no hay una carrera cargada
 │   │   │   ├── Header.tsx         # Nombre de la carrera + botones
+│   │   │   ├── Login.tsx
+│   │   │   ├── Menu.tsx         # Menú lateral con acciones
 │   │   │   ├── NodoMateria.tsx  # Carta de materia individual
 │   │   │   ├── SidebarMateria.tsx    # Panel para agregar materias
 │   │   │   ├── ModalEditarMateria.tsx
 │   │   │   ├── ModalEstadoMateria.tsx
 │   │   │   ├── ModalConfirmacion.tsx
+│   │   │   ├── ModalCrearCarrera.tsx
 │   │   │   └── Separador.tsx    # Títulos de año
 │   │   ├── hooks/
+│   │   │   ├── useAuth.ts    # Lógica de autenticación
 │   │   │   ├── useCarrera.ts    # Lógica principal del estado
 │   │   │   └── useMaterias.ts   # Lógica de cada materia
+│   │   ├── context/
+│   │   │   └── carreraContext.ts
 │   │   ├── types/
 │   │   │   ├── Carrera.ts
 │   │   │   └── Materia.ts
@@ -175,6 +181,26 @@ UnlockU/
 │   ├── tsconfig.json
 │   ├── vite.config.ts
 ├── back/
+│   ├── prisma/
+│   │   ├── migrations/
+│   │   │   ├── folder/
+│   │   │   │   └── migration.sql
+│   │   │   └── migration_lock.toml
+│   │   └── schema.prisma
+│   ├── src/
+│   │   ├── lib/
+│   │   │   └── prisma.ts
+│   │   ├── middleware/
+│   │   │   └── requireAuth.ts
+│   │   ├── routes/
+│   │   │   ├── auth.ts
+│   │   │   ├── carrera.ts
+│   │   │   ├── posiciones.ts
+│   │   │   └── progreso.ts
+│   │   ├── index.ts
+│   │   └── passport.ts
+│   ├── package.json
+│   ├── tsconfig.json
 └── README.md
 ```
 

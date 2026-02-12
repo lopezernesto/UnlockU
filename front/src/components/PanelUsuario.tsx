@@ -1,12 +1,12 @@
 import { LogOut, User } from "lucide-react";
 import { useState } from "react";
 
-interface UserAvatarProps {
+interface PanelUsuarioProps {
   user: any;
   onLogout: () => void;
 }
 
-export default function UserAvatar({ user, onLogout }: UserAvatarProps) {
+export default function PanelUsuario({ user, onLogout }: PanelUsuarioProps) {
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
 
   const inicial = user?.nombre?.charAt(0).toUpperCase() || "U";
