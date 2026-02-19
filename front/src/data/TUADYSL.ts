@@ -151,6 +151,7 @@ export const carreraTUADYSL: CarreraData = {
   id: "tuadysl",
   nombre:
     "Tecnicatura Universitaria en Administración de Sistemas y Software Libre",
+  abreviacion: "TUADYSL",
   aniosDuracion: 3,
   materias: materiasTUADYSL,
 };

@@ -42,21 +42,22 @@ export default function PanelUsuario({ user, onLogout }: PanelUsuarioProps) {
                 {user?.nombre}
               </p>
               <p className="text-white/50 text-xs truncate mt-1">
-                {user?.email}
+                {user?.email || "Usuario invitado"}
               </p>
             </div>
 
             <div className="py-2">
-              <button
-                className="w-full px-4 py-2 text-left text-white/60 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-3 text-sm"
-                onClick={() => {
-                  setMostrarDropdown(false);
-                  // TODO: Abrir modal de perfil
-                }}
-              >
-                <User size={16} />
-                Perfil
-              </button>
+              {user && (
+                <button
+                  className="w-full px-4 py-2 text-left text-white/60 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-3 text-sm"
+                  onClick={() => {
+                    setMostrarDropdown(false);
+                  }}
+                >
+                  <User size={16} />
+                  Perfil
+                </button>
+              )}
 
               <button
                 className="w-full px-4 py-2 text-left text-white/60 hover:text-red-400 hover:bg-white/5 transition-colors flex items-center gap-3 text-sm"

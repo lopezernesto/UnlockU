@@ -6,5 +6,11 @@ export interface CarreraData {
   abreviacion: string;
   aniosDuracion: number;
   materias: MateriaData[];
+}
+export interface CarreraResumen {
+  id: string;
+  nombre: string;
+  abreviacion: string;
+  aniosDuracion: number;
   //updatedAt: number; proximamente para lo de las carreras recientes de los users
 }

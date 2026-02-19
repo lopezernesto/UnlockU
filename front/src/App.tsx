@@ -15,7 +15,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Login from "./components/Login";
 import { useAuth } from "./hooks/useAuth";
-import PanelUsuario from "./components/AvatarUsuario";
+import PanelUsuario from "./components/PanelUsuario";
 import { CarreraProvider, useCarreraContext } from "./context/CarreraContext";
 
 const queryClient = new QueryClient({
@@ -28,7 +28,8 @@ const queryClient = new QueryClient({
 });
 
 function AppContent() {
-  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, login, logout, enableGuestMode } =
+    useAuth();
 
   const {
     carreraActual,
@@ -71,14 +72,7 @@ function AppContent() {
 
   // Pantalla de login
   if (!isAuthenticated) {
-    return (
-      <Login
-        onLogin={login}
-        onGuestAccess={() => {
-          /* Por ahora no hace nada, el usuario simplemente usa la app sin auth */
-        }}
-      />
-    );
+    return <Login onLogin={login} onGuestAccess={enableGuestMode} />;
   }
 
   // App principal (usuario logueado)
@@ -124,8 +118,8 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <CarreraProvider>
         <AppContent />
+        <ReactQueryDevtools initialIsOpen={false} />
       </CarreraProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

@@ -8,6 +8,7 @@ interface Props {
     nombre: string;
     abreviacion: string;
     anios: number;
+    id?: string;
   }) => void;
   initialData?: { nombre: string; abreviacion: string; anios: number };
 }

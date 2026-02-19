@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
 import type { MateriaData } from "../types/Materia";
 import { Award, CircleCheck, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import ModalEditarMateria from "./ModalEditarMateria";
 import { ModalConfirmar } from "./ModalConfirmacion";
 import { ModalAccionEstado } from "./ModalEstadoMateria";
+import { useCarreraContext } from "../context/CarreraContext";
 export type TipoModal =
   | "BORRAR"
   | "REINICIAR"
@@ -20,12 +21,11 @@ interface MateriaNodeProps {
     resetear: (id: string) => void;
     borrar: (id: string) => void;
     editar: (id: string, nuevosDatos: Partial<MateriaData>) => void;
-    todasLasMaterias: MateriaData[];
-    obtenerMateriasPrevias: (anio: number, cuatri: number) => MateriaData[];
   };
 }
-
-export function MateriaNode({ data }: MateriaNodeProps) {
+export const MateriaNode = memo(function MateriaNode({
+  data,
+}: MateriaNodeProps) {
   //Logicas para girar y para la animacion de materia desbloqueada
   const [isFlipped, setIsFlipped] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
@@ -35,6 +35,8 @@ export function MateriaNode({ data }: MateriaNodeProps) {
   const [modalEstados, setModalEstados] = useState<TipoModal>(null);
   const [mostrarBarra, setMostrarBarra] = useState(true);
 
+  const { materias: todasLasMaterias, obtenerMateriasPrevias } =
+    useCarreraContext();
   // Calcular progreso de correlativas
   const calcularProgreso = () => {
     const totalCorrelativas =
@@ -43,7 +45,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
       return { completadas: 0, total: 0, porcentaje: 0 };
 
     const cursadasCompletadas = data.correlativasCursada.filter((idC) => {
-      const materia = data.todasLasMaterias.find((m) => m.id === idC);
+      const materia = todasLasMaterias.find((m) => m.id === idC);
       return (
         materia &&
         (materia.estado === "CURSADA" || materia.estado === "APROBADA")
@@ -51,7 +53,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
     }).length;
 
     const finalesCompletados = data.correlativasFinal.filter((idF) => {
-      const materia = data.todasLasMaterias.find((m) => m.id === idF);
+      const materia = todasLasMaterias.find((m) => m.id === idF);
       return materia && materia.estado === "APROBADA";
     }).length;
 
@@ -255,7 +257,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
                   </p>
                   <ul className="space-y-0.5 pl-1">
                     {data.correlativasCursada.map((idC) => {
-                      const materia = data.todasLasMaterias.find(
+                      const materia = todasLasMaterias.find(
                         (m) => m.id === idC,
                       );
                       const completada =
@@ -290,7 +292,7 @@ export function MateriaNode({ data }: MateriaNodeProps) {
                   </p>
                   <ul className="space-y-0.5 pl-1">
                     {data.correlativasFinal.map((idF) => {
-                      const materia = data.todasLasMaterias.find(
+                      const materia = todasLasMaterias.find(
                         (m) => m.id === idF,
                       );
                       const completada =
@@ -348,8 +350,8 @@ export function MateriaNode({ data }: MateriaNodeProps) {
           materia={data}
           onClose={() => setModalEdicion(false)}
           onGuardar={data.editar}
-          obtenerMateriasPrevias={data.obtenerMateriasPrevias}
-          todasLasMaterias={data.todasLasMaterias}
+          obtenerMateriasPrevias={obtenerMateriasPrevias}
+          todasLasMaterias={todasLasMaterias}
         />
       )}
 
@@ -402,4 +404,4 @@ export function MateriaNode({ data }: MateriaNodeProps) {
       )}
     </div>
   );
-}
+});

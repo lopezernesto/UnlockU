@@ -110,7 +110,13 @@ export const api = {
     return res.json();
   },
 
-  saveCarrera: async (data: { nombre: string; materias: any[] }) => {
+  saveCarrera: async (data: {
+    id?: string;
+    nombre: string;
+    abreviacion: string;
+    aniosDuracion: number;
+    materias: any[];
+  }) => {
     const res = await fetch(`${API_URL}/api/carreras`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -123,7 +129,12 @@ export const api = {
 
   updateCarrera: async (
     id: string,
-    data: { nombre: string; materias: any[] },
+    data: {
+      nombre: string;
+      abreviacion: string;
+      aniosDuracion: number;
+      materias: any[];
+    },
   ) => {
     const res = await fetch(`${API_URL}/api/carreras/${id}`, {
       method: "PUT",

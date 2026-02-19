@@ -3,29 +3,40 @@ import useCarrera from "../hooks/useCarrera";
 import useMaterias from "../hooks/useMaterias";
 import type { CarreraData } from "../types/Carrera";
 import type { MateriaData } from "../types/Materia";
+import { useProgreso } from "../hooks/useProgreso";
+import { useAuth } from "../hooks/useAuth";
+import type { Edge, Node, OnEdgesChange, OnNodesChange } from "@xyflow/react";
 
-// Definimos qué datos y funciones estarán disponibles en toda la app
+// Definimos que datos y funciones estaran disponibles en toda la app
 interface CarreraContextType {
   carreraActual: CarreraData | null;
   materias: MateriaData[];
   aniosDuracion: number;
   resetKey: number;
-  nodos: any[];
-  arcos: any[];
+  nodos: Node[];
+  arcos: Edge[];
   nodeTypes: any;
-  onNodesChange: any;
-  onEdgesChange: any;
+  onNodesChange: OnNodesChange;
+  onEdgesChange: OnEdgesChange;
+  isGuest: boolean;
+  isAuthenticated: boolean;
+
   // Funciones de Carrera
   cargarLCC: () => void;
   cargarADYSL: () => void;
   cambiarCarrera: () => void;
   importarProgreso: (file: File) => void;
   exportarProgreso: () => void;
-  crearNuevaCarrera: (datos: {
-    nombre: string;
-    abreviacion: string;
-    anios: number;
-  }) => void;
+  crearNuevaCarrera: (
+    datos: {
+      nombre: string;
+      abreviacion: string;
+      anios: number;
+    },
+    id?: string,
+  ) => void;
+  cargarCarreraCustom: (id: string) => void;
+
   // Funciones de Materias
   agregarMateria: (m: MateriaData) => void;
   obtenerMateriasPrevias: (anio: number, cuatri: number) => MateriaData[];
@@ -35,15 +46,22 @@ interface CarreraContextType {
 const CarreraContext = createContext<CarreraContextType | undefined>(undefined);
 
 export function CarreraProvider({ children }: { children: React.ReactNode }) {
-  // 1. Hook de Carrera (Persistencia y carga)
-  const carrera = useCarrera();
+  const { isAuthenticated, isGuest } = useAuth();
+  const carrera = useCarrera(isAuthenticated, isGuest);
 
-  // 2. Hook de Materias (Lógica de React Flow y correlativas)
+  const { guardarProgreso, resetearProgreso } = useProgreso(
+    carrera.carreraActual?.id ?? null,
+    isAuthenticated,
+    isGuest,
+  );
+
   const materiasLogic = useMaterias({
     materias: carrera.materias,
     aniosDuracion: carrera.aniosDuracion,
     actualizarMaterias: carrera.actualizarMaterias,
     resetKey: carrera.resetKey,
+    guardarProgreso,
+    resetearProgreso,
   });
 
   const value = {
@@ -58,6 +76,9 @@ export function CarreraProvider({ children }: { children: React.ReactNode }) {
     importarProgreso: carrera.importarProgreso,
     exportarProgreso: carrera.exportarProgreso,
     crearNuevaCarrera: carrera.crearNuevaCarrera,
+    cargarCarreraCustom: carrera.cargarCarreraCustom,
+    isAuthenticated,
+    isGuest,
   };
 
   return (
@@ -65,7 +86,6 @@ export function CarreraProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Hook personalizado para usar el contexto fácilmente
 export function useCarreraContext() {
   const context = useContext(CarreraContext);
   if (!context) {

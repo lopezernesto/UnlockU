@@ -161,6 +161,8 @@ UnlockU/
 │   │   ├── hooks/
 │   │   │   ├── useAuth.ts    # Lógica de autenticación
 │   │   │   ├── useCarrera.ts    # Lógica principal del estado
+│   │   │   ├── useCarreraCustom.ts    # Para las carreras guardadas en el back
+│   │   │   ├── Progreso.ts    # Para el progreso guardado en el back
 │   │   │   └── useMaterias.ts   # Lógica de cada materia
 │   │   ├── context/
 │   │   │   └── carreraContext.ts
@@ -183,7 +185,11 @@ UnlockU/
 ├── back/
 │   ├── prisma/
 │   │   ├── migrations/
-│   │   │   ├── folder/
+│   │   │   ├── init/
+│   │   │   │   └── migration.sql
+│   │   │   ├── carrera_fields/
+│   │   │   │   └── migration.sql
+│   │   │   ├── session_table/
 │   │   │   │   └── migration.sql
 │   │   │   └── migration_lock.toml
 │   │   └── schema.prisma
@@ -194,7 +200,7 @@ UnlockU/
 │   │   │   └── requireAuth.ts
 │   │   ├── routes/
 │   │   │   ├── auth.ts
-│   │   │   ├── carrera.ts
+│   │   │   ├── carreras.ts
 │   │   │   ├── posiciones.ts
 │   │   │   └── progreso.ts
 │   │   ├── index.ts

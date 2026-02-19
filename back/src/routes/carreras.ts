@@ -48,18 +48,17 @@ router.get("/:id", requireAuth, async (req, res) => {
 router.post("/", requireAuth, async (req, res) => {
   try {
     const usuarioId = (req.user as any).id;
-    const { nombre, materias } = req.body;
+    const { id, nombre, abreviacion, aniosDuracion, materias } = req.body;
 
-    const carrera = await prisma.carreraCustom.create({
-      data: {
-        usuarioId,
-        nombre,
-        materias,
-      },
+    const carrera = await prisma.carreraCustom.upsert({
+      where: { id: id ?? "" },
+      update: { nombre, abreviacion, aniosDuracion, materias },
+      create: { id, usuarioId, nombre, abreviacion, aniosDuracion, materias },
     });
 
     res.json(carrera);
   } catch (error) {
+    console.error("Error completo:", error);
     res.status(500).json({ error: "Error al crear carrera" });
   }
 });
@@ -69,7 +68,7 @@ router.put("/:id", requireAuth, async (req, res) => {
   try {
     const usuarioId = (req.user as any).id;
     const { id } = req.params;
-    const { nombre, materias } = req.body;
+    const { nombre, abreviacion, aniosDuracion, materias } = req.body;
 
     if (typeof id !== "string") {
       return res.status(400).json({ error: "ID inválido" });
@@ -77,7 +76,7 @@ router.put("/:id", requireAuth, async (req, res) => {
 
     const carrera = await prisma.carreraCustom.updateMany({
       where: { id, usuarioId },
-      data: { nombre, materias },
+      data: { nombre, abreviacion, aniosDuracion, materias },
     });
 
     if (carrera.count === 0) {

@@ -98,9 +98,9 @@ const materiasIniciales: MateriaData[] = [
   },
 ];
 export const carreraPrueba: CarreraData = {
-  id: "tuadysl",
-  nombre:
-    "Tecnicatura Universitaria en Administración de Sistemas y Software Libre",
+  id: "test",
+  nombre: "carrera prueba",
+  abreviacion: "test",
   aniosDuracion: 3,
   materias: materiasIniciales,
 };

@@ -450,6 +450,7 @@ const materiasLCC: MateriaData[] = [
 export const carreraLCC: CarreraData = {
   id: "lcc",
   nombre: "Licenciatura en Ciencias de la Computación",
+  abreviacion: "LCC",
   aniosDuracion: 5,
   materias: materiasLCC,
 };

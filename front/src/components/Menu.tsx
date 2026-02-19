@@ -9,9 +9,9 @@ import {
 } from "lucide-react";
 import SidebarMateria from "./SidebarMateria";
 import { useCarreraContext } from "../context/CarreraContext";
-import { useAuth } from "../hooks/useAuth";
 import ModalCrearCarrera from "./ModalCrearCarrera";
 import { ModalConfirmar } from "./ModalConfirmacion";
+import { useCarrerasCustom } from "../hooks/useCarreraCustom";
 
 type MenuLevel = "INICIO" | "MIS_CARRERAS";
 
@@ -23,14 +23,22 @@ export default function Menu() {
     importarProgreso,
     cambiarCarrera,
     crearNuevaCarrera,
+    cargarCarreraCustom,
+    isGuest,
+    isAuthenticated,
   } = useCarreraContext();
-  const { isAuthenticated } = useAuth();
+
   const [nivel, setNivel] = useState<MenuLevel>("INICIO");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmar, setIsConfirmar] = useState(false);
   const hayCarrera = carreraActual !== null;
-  const recientes = [{ id: "1", abreviacion: "LSI", nombre: "Sistemas" }];
+
+  const { carreras: carrerasCustom, crearCarrera } = useCarrerasCustom(
+    isAuthenticated,
+    isGuest,
+  );
+
   return (
     <>
       <div className="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-[100]">
@@ -41,7 +49,7 @@ export default function Menu() {
               <button
                 onClick={() => {
                   cambiarCarrera();
-                  if (isAuthenticated) setNivel("MIS_CARRERAS");
+                  if (!isGuest) setNivel("MIS_CARRERAS");
                   else {
                     setIsConfirmar(true);
                     setNivel("INICIO");
@@ -96,7 +104,15 @@ export default function Menu() {
                   </button>
                   <button
                     onClick={() => setNivel("MIS_CARRERAS")}
-                    className="text-white/60 hover:text-blue-400 flex flex-col items-center gap-1 group"
+                    className={
+                      isGuest
+                        ? "text-white/20 cursor-not-allowed flex flex-col items-center gap-1 group"
+                        : "text-white/60 hover:text-green-400 flex flex-col items-center gap-1 group"
+                    }
+                    disabled={isGuest}
+                    title={
+                      isGuest ? "Función no disponible para invitados" : ""
+                    }
                   >
                     <GraduationCap size={20} />
                     <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -132,12 +148,12 @@ export default function Menu() {
                     </span>
                   </button>
                   <div className="h-px w-full bg-white/10" />
-                  {/* Lista de Recientes (Círculos de color que hablamos) */}
-                  {recientes.map((c) => (
+                  {/* Lista de Recientes */}
+                  {carrerasCustom.map((c) => (
                     <button
                       key={c.id}
                       onClick={() => {
-                        /* Lógica para cargar esta carrera */
+                        cargarCarreraCustom(c.id);
                       }}
                       className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/50 text-blue-400 flex items-center justify-center text-xs font-bold hover:bg-blue-600/40 transition-all group relative"
                     >
@@ -183,8 +199,22 @@ export default function Menu() {
       <ModalCrearCarrera
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSave={(datos) => {
-          crearNuevaCarrera(datos);
+        onSave={async (datos) => {
+          if (isAuthenticated && !isGuest) {
+            // Usuario logueado: guardar en backend
+            const carreraGuardada = await crearCarrera({
+              id: crypto.randomUUID(),
+              nombre: datos.nombre,
+              abreviacion: datos.abreviacion,
+              aniosDuracion: datos.anios,
+              materias: [],
+            });
+            cargarCarreraCustom(carreraGuardada.id);
+          } else {
+            // Invitado: solo localStorage
+            crearNuevaCarrera(datos);
+          }
+          setIsModalOpen(false);
         }}
       />
     </>

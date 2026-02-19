@@ -16,6 +16,13 @@ interface useMateriasProps {
   aniosDuracion: number;
   actualizarMaterias: (nuevasMaterias: MateriaData[]) => void;
   resetKey: number;
+  guardarProgreso: (
+    materiaId: string,
+    estado: "CURSADA" | "APROBADA",
+    fecha?: string,
+    nota?: number,
+  ) => void;
+  resetearProgreso: (materiaId: string) => void;
 }
 
 export default function useMaterias({
@@ -23,6 +30,8 @@ export default function useMaterias({
   aniosDuracion,
   actualizarMaterias,
   resetKey,
+  guardarProgreso,
+  resetearProgreso,
 }: useMateriasProps) {
   //localStorage.clear(); //para hacer pruebas borrando todo
   //Este useMemo se utiliza para que se ReactFlow no re-renderice los nodos innecesariamente cuando hay algun cambio en el estado
@@ -384,8 +393,6 @@ export default function useMaterias({
         resetear: resetearMateria,
         borrar: borrarMateria,
         editar: editarMateria,
-        todasLasMaterias: materias,
-        obtenerMateriasPrevias,
       },
     }));
 
