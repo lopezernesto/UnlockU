@@ -34,20 +34,35 @@ router.post("/", requireAuth, async (req, res) => {
       where: {
         usuarioId_carreraId_materiaId: { usuarioId, carreraId, materiaId },
       },
-      update: { estado, nota, fecha: fecha ? new Date(fecha) : null },
+      update: { estado, nota, fecha: fecha ?? null },
       create: {
         usuarioId,
         carreraId,
         materiaId,
         estado,
         nota,
-        fecha: fecha ? new Date(fecha) : null,
+        fecha: fecha ?? null,
       },
     });
 
     res.json(progreso);
   } catch (error) {
     res.status(500).json({ error: "Error al guardar progreso" });
+  }
+});
+// Borrar todo el progreso de una carrera
+router.delete("/:carreraId", requireAuth, async (req, res) => {
+  try {
+    const usuarioId = (req.user as any).id;
+    const carreraId = req.params.carreraId as string;
+
+    await prisma.progresoMateria.deleteMany({
+      where: { usuarioId, carreraId },
+    });
+
+    res.json({ ok: true });
+  } catch (error) {
+    res.status(500).json({ error: "Error al borrar progreso de carrera" });
   }
 });
 

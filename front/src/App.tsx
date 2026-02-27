@@ -14,9 +14,10 @@ import { useCallback } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Login from "./components/Login";
-import { useAuth } from "./hooks/useAuth";
 import PanelUsuario from "./components/PanelUsuario";
 import { CarreraProvider, useCarreraContext } from "./context/CarreraContext";
+import { AuthProvider, useAuthContext } from "./context/AuthContext";
+import { api } from "./services/api";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,8 +29,15 @@ const queryClient = new QueryClient({
 });
 
 function AppContent() {
-  const { user, isAuthenticated, isLoading, login, logout, enableGuestMode } =
-    useAuth();
+  const {
+    user,
+    isAuthenticated,
+    isGuest,
+    isLoading,
+    login,
+    logout,
+    enableGuestMode,
+  } = useAuthContext();
 
   const {
     carreraActual,
@@ -53,13 +61,27 @@ function AppContent() {
     localStorage.setItem("react-flow-viewport", JSON.stringify(viewport));
   }, []);
 
-  const onNodeDragStop = useCallback((_: any, node: any) => {
-    const posiciones = JSON.parse(
-      localStorage.getItem("nodos-posiciones") || "{}",
-    );
-    posiciones[node.id] = node.position;
-    localStorage.setItem("nodos-posiciones", JSON.stringify(posiciones));
-  }, []);
+  const onNodeDragStop = useCallback(
+    (_: any, node: any) => {
+      const posiciones = JSON.parse(
+        localStorage.getItem("nodos-posiciones") || "{}",
+      );
+      posiciones[node.id] = node.position;
+      localStorage.setItem("nodos-posiciones", JSON.stringify(posiciones));
+
+      if (isAuthenticated && !isGuest && carreraActual) {
+        api
+          .savePosicion({
+            carreraId: carreraActual.id,
+            materiaId: node.id,
+            x: node.position.x,
+            y: node.position.y,
+          })
+          .catch(console.error);
+      }
+    },
+    [isAuthenticated, isGuest, carreraActual],
+  );
 
   // Pantalla de carga
   if (isLoading) {
@@ -116,10 +138,12 @@ function AppContent() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <CarreraProvider>
-        <AppContent />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </CarreraProvider>
+      <AuthProvider>
+        <CarreraProvider>
+          <AppContent />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </CarreraProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

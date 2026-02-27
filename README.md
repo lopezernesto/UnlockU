@@ -12,6 +12,7 @@ UnlockU es una aplicación web interactiva que te permite visualizar y gestionar
 - 🔗 **Correlativas automáticas**: El sistema calcula automáticamente qué materias podés cursar
 - 📊 **Estados visuales**: Bloqueada, Habilitada, Cursada y Aprobada con colores distintos
 - 💾 **Persistencia local**: Tu progreso se guarda automáticamente en el navegador
+- ☁️ **Sincronización en servidor**: Disponible para usuarios con mail institucional
 - 📥 **Importar/Exportar**: Respaldá o compartí tu progreso en formato JSON
 - ✏️ **Totalmente editable**: Creá, editá y eliminá materias según tu plan de estudios
 - 🎨 **Interfaz moderna**: Diseño dark mode con animaciones fluidas
@@ -165,10 +166,13 @@ UnlockU/
 │   │   │   ├── Progreso.ts    # Para el progreso guardado en el back
 │   │   │   └── useMaterias.ts   # Lógica de cada materia
 │   │   ├── context/
-│   │   │   └── carreraContext.ts
+│   │   │   ├── authContext.tsx
+│   │   │   └── carreraContext.tsx
 │   │   ├── types/
 │   │   │   ├── Carrera.ts
 │   │   │   └── Materia.ts
+│   │   ├── utils/
+│   │   │   └── utils.ts #Funciones compartidas
 │   │   ├── data/
 │   │   │   ├── LCC.ts           # Plan de LCC completo
 │   │   │   ├── TUADYSL.ts       # Plan de TUADYSL completo
@@ -190,6 +194,8 @@ UnlockU/
 │   │   │   ├── carrera_fields/
 │   │   │   │   └── migration.sql
 │   │   │   ├── session_table/
+│   │   │   │   └── migration.sql
+│   │   │   ├── fecha_progreso/
 │   │   │   │   └── migration.sql
 │   │   │   └── migration_lock.toml
 │   │   └── schema.prisma

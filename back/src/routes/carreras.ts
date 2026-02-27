@@ -49,7 +49,24 @@ router.post("/", requireAuth, async (req, res) => {
   try {
     const usuarioId = (req.user as any).id;
     const { id, nombre, abreviacion, aniosDuracion, materias } = req.body;
+    const existente = await prisma.carreraCustom.findFirst({
+      where: {
+        usuarioId,
+        OR: [
+          { nombre: { equals: nombre, mode: "insensitive" } },
+          { abreviacion: { equals: abreviacion, mode: "insensitive" } },
+        ],
+      },
+    });
 
+    if (existente) {
+      return res.status(409).json({
+        error:
+          existente.nombre === nombre
+            ? "Ya tenes una carrera con ese nombre"
+            : "Ya tenes una carrera con esa abreviación",
+      });
+    }
     const carrera = await prisma.carreraCustom.upsert({
       where: { id: id ?? "" },
       update: { nombre, abreviacion, aniosDuracion, materias },

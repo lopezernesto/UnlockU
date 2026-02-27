@@ -1,10 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { api } from "../services/api";
 import { useState } from "react";
 
 export function useAuth() {
-  const queryClient = useQueryClient();
-
   const [isGuest, setIsGuest] = useState(() => {
     return localStorage.getItem("guest-mode") === "true";
   });
@@ -20,12 +18,11 @@ export function useAuth() {
   const logoutMutation = useMutation({
     mutationFn: api.logout,
     onSuccess: () => {
-      queryClient.setQueryData(["auth", "me"], null);
-      queryClient.clear();
       localStorage.removeItem("guest-mode");
       localStorage.removeItem("carrera-data");
       localStorage.removeItem("nodos-posiciones");
-      setIsGuest(false);
+      localStorage.removeItem("react-flow-viewport");
+      window.location.href = "/";
     },
   });
   const enableGuestMode = () => {

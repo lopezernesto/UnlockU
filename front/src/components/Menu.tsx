@@ -12,6 +12,9 @@ import { useCarreraContext } from "../context/CarreraContext";
 import ModalCrearCarrera from "./ModalCrearCarrera";
 import { ModalConfirmar } from "./ModalConfirmacion";
 import { useCarrerasCustom } from "../hooks/useCarreraCustom";
+import { api } from "../services/api";
+import { carreraLCC } from "../data/LCC";
+import { carreraTUADYSL } from "../data/TUADYSL";
 
 type MenuLevel = "INICIO" | "MIS_CARRERAS";
 
@@ -32,6 +35,9 @@ export default function Menu() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmar, setIsConfirmar] = useState(false);
+  const [carreraAConfirmar, setCarreraAConfirmar] = useState<
+    "LCC" | "TUADYSL" | null
+  >(null);
   const hayCarrera = carreraActual !== null;
 
   const { carreras: carrerasCustom, crearCarrera } = useCarrerasCustom(
@@ -48,9 +54,10 @@ export default function Menu() {
             <>
               <button
                 onClick={() => {
-                  cambiarCarrera();
-                  if (!isGuest) setNivel("MIS_CARRERAS");
-                  else {
+                  if (!isGuest) {
+                    setNivel("MIS_CARRERAS");
+                    cambiarCarrera();
+                  } else {
                     setIsConfirmar(true);
                     setNivel("INICIO");
                   }
@@ -85,7 +92,18 @@ export default function Menu() {
               {nivel === "INICIO" ? (
                 <>
                   <button
-                    onClick={cargarLCC}
+                    onClick={async () => {
+                      if (isAuthenticated && !isGuest) {
+                        try {
+                          await api.getCarrera(carreraLCC.id);
+                          setCarreraAConfirmar("LCC");
+                        } catch {
+                          cargarLCC();
+                        }
+                      } else {
+                        cargarLCC();
+                      }
+                    }}
                     className="text-white/60 hover:text-cyan-400 flex flex-col items-center gap-1 group"
                   >
                     <Library size={20} />
@@ -94,12 +112,23 @@ export default function Menu() {
                     </span>
                   </button>
                   <button
-                    onClick={cargarADYSL}
+                    onClick={async () => {
+                      if (isAuthenticated && !isGuest) {
+                        try {
+                          await api.getCarrera(carreraTUADYSL.id);
+                          setCarreraAConfirmar("TUADYSL");
+                        } catch {
+                          cargarADYSL();
+                        }
+                      } else {
+                        cargarADYSL();
+                      }
+                    }}
                     className="text-white/60 hover:text-cyan-400 flex flex-col items-center gap-1 group"
                   >
                     <Library size={20} />
                     <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                      ADYSL
+                      TUADYSL
                     </span>
                   </button>
                   <button
@@ -134,6 +163,17 @@ export default function Menu() {
                       Importar
                     </span>
                   </label>
+                  {isGuest && (
+                    <button
+                      className="text-white/60 hover:text-green-400 flex flex-col items-center gap-1 group"
+                      onClick={() => setIsModalOpen(true)}
+                    >
+                      <Plus size={20} />
+                      <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+                        Crear
+                      </span>
+                    </button>
+                  )}
                 </>
               ) : (
                 /* NIVEL 2: MIS CARRERAS */
@@ -196,6 +236,29 @@ export default function Menu() {
           onClose={() => setIsConfirmar(false)}
         />
       )}
+
+      {carreraAConfirmar && (
+        <ModalConfirmar
+          titulo="¿Reemplazar carrera?"
+          mensaje="Ya tenés esta carrera guardada. ¿Querés reemplazar tu progreso actual?"
+          textoBoton="Reemplazar"
+          colorBoton="bg-red-600 hover:bg-red-500"
+          onConfirm={() => {
+            if (carreraAConfirmar === "LCC") {
+              api.deleteProgresoCarrera(carreraLCC.id).catch(() => {});
+              api.deletePosiciones(carreraLCC.id).catch(() => {});
+              cargarLCC();
+            } else {
+              api.deleteProgresoCarrera(carreraTUADYSL.id).catch(() => {});
+              api.deletePosiciones(carreraTUADYSL.id).catch(() => {});
+              cargarADYSL();
+            }
+            setCarreraAConfirmar(null);
+          }}
+          onClose={() => setCarreraAConfirmar(null)}
+        />
+      )}
+
       <ModalCrearCarrera
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

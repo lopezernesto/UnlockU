@@ -10,19 +10,13 @@ import {
 import { MateriaNode } from "../components/NodoMateria";
 import { AnioNode } from "../components/Separador";
 import type { EstadoMateria, MateriaData } from "../types/Materia";
+import { recalcularEstados } from "../utils/utils.ts";
 
 interface useMateriasProps {
   materias: MateriaData[];
   aniosDuracion: number;
   actualizarMaterias: (nuevasMaterias: MateriaData[]) => void;
   resetKey: number;
-  guardarProgreso: (
-    materiaId: string,
-    estado: "CURSADA" | "APROBADA",
-    fecha?: string,
-    nota?: number,
-  ) => void;
-  resetearProgreso: (materiaId: string) => void;
 }
 
 export default function useMaterias({
@@ -30,8 +24,6 @@ export default function useMaterias({
   aniosDuracion,
   actualizarMaterias,
   resetKey,
-  guardarProgreso,
-  resetearProgreso,
 }: useMateriasProps) {
   //localStorage.clear(); //para hacer pruebas borrando todo
   //Este useMemo se utiliza para que se ReactFlow no re-renderice los nodos innecesariamente cuando hay algun cambio en el estado
@@ -66,35 +58,6 @@ export default function useMaterias({
     },
     [materias, actualizarMaterias],
   );
-
-  // Recalcular estados para corregir correlatividades
-  const recalcularEstados = (lista: MateriaData[]): MateriaData[] => {
-    return lista.map((m) => {
-      if (m.estado === "APROBADA" || m.estado === "CURSADA") return { ...m };
-
-      const cursadasListas = m.correlativasCursada.every((idC) => {
-        const previa = lista.find((p) => p.id === idC);
-        return (
-          previa &&
-          (previa.estado === "CURSADA" || previa.estado === "APROBADA")
-        );
-      });
-
-      const finalesListos = m.correlativasFinal.every((idF) => {
-        const previa = lista.find((p) => p.id === idF);
-        return previa && previa.estado === "APROBADA";
-      });
-
-      if (cursadasListas && finalesListos) {
-        return {
-          ...m,
-          estado: m.estado === "BLOQUEADA" ? "HABILITADA" : m.estado,
-        };
-      } else {
-        return { ...m, estado: "BLOQUEADA" as EstadoMateria };
-      }
-    });
-  };
 
   // ABM DE MATERIAS
 
@@ -361,11 +324,6 @@ export default function useMaterias({
     [],
   );
 
-  const resetearPosiciones = useCallback(() => {
-    localStorage.removeItem("nodos-posiciones");
-    setMaterias((prev) => [...prev]);
-  }, [setMaterias]);
-
   // Efecto para sincronizar Arcos y Nodos cuando cambian las materias
   useEffect(() => {
     if (materias.length === 0) {
@@ -419,7 +377,6 @@ export default function useMaterias({
     nodeTypes,
     onNodesChange,
     onEdgesChange,
-    resetearPosiciones,
     agregarMateria,
     obtenerMateriasPrevias,
   };

@@ -3,9 +3,8 @@ import useCarrera from "../hooks/useCarrera";
 import useMaterias from "../hooks/useMaterias";
 import type { CarreraData } from "../types/Carrera";
 import type { MateriaData } from "../types/Materia";
-import { useProgreso } from "../hooks/useProgreso";
-import { useAuth } from "../hooks/useAuth";
 import type { Edge, Node, OnEdgesChange, OnNodesChange } from "@xyflow/react";
+import { useAuthContext } from "./AuthContext";
 
 // Definimos que datos y funciones estaran disponibles en toda la app
 interface CarreraContextType {
@@ -36,32 +35,24 @@ interface CarreraContextType {
     id?: string,
   ) => void;
   cargarCarreraCustom: (id: string) => void;
+  resetearPosiciones: () => void;
 
   // Funciones de Materias
   agregarMateria: (m: MateriaData) => void;
   obtenerMateriasPrevias: (anio: number, cuatri: number) => MateriaData[];
-  resetearPosiciones: () => void;
 }
 
 const CarreraContext = createContext<CarreraContextType | undefined>(undefined);
 
 export function CarreraProvider({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isGuest } = useAuth();
+  const { isAuthenticated, isGuest } = useAuthContext();
   const carrera = useCarrera(isAuthenticated, isGuest);
-
-  const { guardarProgreso, resetearProgreso } = useProgreso(
-    carrera.carreraActual?.id ?? null,
-    isAuthenticated,
-    isGuest,
-  );
 
   const materiasLogic = useMaterias({
     materias: carrera.materias,
     aniosDuracion: carrera.aniosDuracion,
     actualizarMaterias: carrera.actualizarMaterias,
     resetKey: carrera.resetKey,
-    guardarProgreso,
-    resetearProgreso,
   });
 
   const value = {
@@ -77,6 +68,7 @@ export function CarreraProvider({ children }: { children: React.ReactNode }) {
     exportarProgreso: carrera.exportarProgreso,
     crearNuevaCarrera: carrera.crearNuevaCarrera,
     cargarCarreraCustom: carrera.cargarCarreraCustom,
+    resetearPosiciones: carrera.resetearPosiciones,
     isAuthenticated,
     isGuest,
   };

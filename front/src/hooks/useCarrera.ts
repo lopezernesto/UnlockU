@@ -2,13 +2,15 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { carreraLCC } from "../data/LCC";
 import { carreraTUADYSL } from "../data/TUADYSL";
 import type { CarreraData } from "../types/Carrera";
-import type { MateriaData } from "../types/Materia";
+import type { EstadoMateria, MateriaData } from "../types/Materia";
 import { api } from "../services/api";
+import { recalcularEstados } from "../utils/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
+  const queryClient = useQueryClient();
   const debeUsarBackend = isAuthenticated && !isGuest;
   const [carreraActual, setCarreraActual] = useState<CarreraData | null>(() => {
-    if (debeUsarBackend) return null;
     const guardado = localStorage.getItem("carrera-data");
     return guardado ? JSON.parse(guardado) : null;
   });
@@ -33,6 +35,14 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     setResetKey((prev) => prev + 1);
   }, []);
 
+  const resetearPosiciones = useCallback(() => {
+    localStorage.removeItem("nodos-posiciones");
+    if (debeUsarBackend && carreraActual?.id) {
+      api.deletePosiciones(carreraActual.id).catch(console.error);
+    }
+    setResetKey((prev) => prev + 1);
+  }, [debeUsarBackend, carreraActual?.id]);
+
   const actualizarMaterias = useCallback(
     (nuevasMaterias: MateriaData[]) => {
       setCarreraActual((prev) => {
@@ -40,16 +50,47 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
         const actualizada = { ...prev, materias: nuevasMaterias };
 
         if (debeUsarBackend) {
+          const materiasLimpias = nuevasMaterias.map((m) => ({
+            ...m,
+            estado: (m.estado === "CURSADA" || m.estado === "APROBADA"
+              ? "HABILITADA"
+              : m.estado) as EstadoMateria,
+            nota: undefined,
+            anioCursada: undefined,
+            anioFinal: undefined,
+          }));
+
           api
             .updateCarrera(prev.id, {
               nombre: prev.nombre,
               abreviacion: prev.abreviacion,
               aniosDuracion: prev.aniosDuracion,
-              materias: nuevasMaterias,
+              materias: materiasLimpias,
             })
-            .catch((err) => {
-              console.error("Error al sincronizar con el backend:", err);
-            });
+            .catch(console.error);
+
+          nuevasMaterias.forEach((nueva) => {
+            const anterior = prev.materias.find((m) => m.id === nueva.id);
+            if (!anterior || anterior.estado === nueva.estado) return;
+
+            if (nueva.estado === "CURSADA" || nueva.estado === "APROBADA") {
+              api
+                .saveProgreso({
+                  carreraId: prev.id,
+                  materiaId: nueva.id,
+                  estado: nueva.estado,
+                  nota: nueva.nota,
+                  fecha:
+                    nueva.estado === "APROBADA"
+                      ? nueva.anioFinal
+                      : nueva.anioCursada,
+                })
+                .catch(console.error);
+            } else {
+              // BLOQUEADA o HABILITADA = resetear progreso
+              api.deleteProgreso(prev.id, nueva.id).catch(console.error);
+            }
+          });
         }
 
         return actualizada;
@@ -59,20 +100,21 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
   );
 
   function aplicarProgreso(carrera: CarreraData, progreso: any[]): CarreraData {
+    const materiasConProgreso = carrera.materias.map((m) => {
+      const p = progreso.find((p) => p.materiaId === m.id);
+      if (!p) return m;
+      return {
+        ...m,
+        estado: p.estado,
+        nota: p.nota ?? undefined,
+        anioCursada: p.estado === "CURSADA" ? p.fecha : undefined,
+        anioFinal: p.estado === "APROBADA" ? p.fecha : undefined,
+      };
+    });
+
     return {
       ...carrera,
-      materias: carrera.materias.map((m) => {
-        const p = progreso.find((p) => p.materiaId === m.id);
-        if (!p) return m;
-        return {
-          ...m,
-          estado: p.estado,
-          nota: p.nota ?? undefined,
-          anioCursada:
-            p.estado === "CURSADA" ? p.fecha?.slice(0, 4) : undefined,
-          anioFinal: p.estado === "APROBADA" ? p.fecha?.slice(0, 4) : undefined,
-        };
-      }),
+      materias: recalcularEstados(materiasConProgreso),
     };
   }
 
@@ -80,12 +122,23 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     async (id: string) => {
       limpiarLocalStorage();
       if (debeUsarBackend) {
-        const [carrera, progreso] = await Promise.all([
+        const [carrera, progreso, posiciones] = await Promise.all([
           api.getCarrera(id),
           api.getProgreso(id),
+          api.getPosiciones(id),
         ]);
         const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        setTimeout(() => setCarreraActual(carreraConProgreso), 0);
+        setTimeout(() => {
+          const posicionesMap: Record<string, { x: number; y: number }> = {};
+          posiciones.forEach((p: any) => {
+            posicionesMap[p.materiaId] = { x: p.x, y: p.y };
+          });
+          localStorage.setItem(
+            "nodos-posiciones",
+            JSON.stringify(posicionesMap),
+          );
+          setCarreraActual(carreraConProgreso);
+        }, 0);
       }
     },
     [limpiarLocalStorage, debeUsarBackend],
@@ -95,12 +148,23 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     limpiarLocalStorage();
     if (debeUsarBackend) {
       try {
-        const [carrera, progreso] = await Promise.all([
+        const [carrera, progreso, posiciones] = await Promise.all([
           api.getCarrera(carreraLCC.id),
           api.getProgreso(carreraLCC.id),
+          api.getPosiciones(carreraLCC.id),
         ]);
         const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        setTimeout(() => setCarreraActual(carreraConProgreso), 0);
+        setTimeout(() => {
+          const posicionesMap: Record<string, { x: number; y: number }> = {};
+          posiciones.forEach((p: any) => {
+            posicionesMap[p.materiaId] = { x: p.x, y: p.y };
+          });
+          localStorage.setItem(
+            "nodos-posiciones",
+            JSON.stringify(posicionesMap),
+          );
+          setCarreraActual(carreraConProgreso);
+        }, 0);
       } catch {
         // Primera vez: guardar la estructura en el back y cargar sin progreso
         await api.saveCarrera({
@@ -110,6 +174,7 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
           aniosDuracion: carreraLCC.aniosDuracion,
           materias: carreraLCC.materias,
         });
+        queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
         setTimeout(() => setCarreraActual(carreraLCC), 0);
       }
     } else {
@@ -121,14 +186,26 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     limpiarLocalStorage();
     if (debeUsarBackend) {
       try {
-        const [carrera, progreso] = await Promise.all([
+        const [carrera, progreso, posiciones] = await Promise.all([
           api.getCarrera(carreraTUADYSL.id),
           api.getProgreso(carreraTUADYSL.id),
+          api.getPosiciones(carreraTUADYSL.id),
         ]);
         const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        setTimeout(() => setCarreraActual(carreraConProgreso), 0);
+        setTimeout(() => {
+          const posicionesMap: Record<string, { x: number; y: number }> = {};
+          posiciones.forEach((p: any) => {
+            posicionesMap[p.materiaId] = { x: p.x, y: p.y };
+          });
+          localStorage.setItem(
+            "nodos-posiciones",
+            JSON.stringify(posicionesMap),
+          );
+          setCarreraActual(carreraConProgreso);
+        }, 0);
       } catch {
         // Primera vez: guardar la estructura en el back y cargar sin progreso
+        await api.deleteProgresoCarrera(carreraTUADYSL.id).catch(() => {});
         await api.saveCarrera({
           id: carreraTUADYSL.id,
           nombre: carreraTUADYSL.nombre,
@@ -136,6 +213,7 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
           aniosDuracion: carreraTUADYSL.aniosDuracion,
           materias: carreraTUADYSL.materias,
         });
+        queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
         setTimeout(() => setCarreraActual(carreraTUADYSL), 0);
       }
     } else {
@@ -222,5 +300,6 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     actualizarMaterias,
     crearNuevaCarrera,
     cargarCarreraCustom,
+    resetearPosiciones,
   };
 }

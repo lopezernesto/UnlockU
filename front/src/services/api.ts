@@ -47,6 +47,15 @@ export const api = {
     return res.json();
   },
 
+  deleteProgresoCarrera: async (carreraId: string) => {
+    const res = await fetch(`${API_URL}/api/progreso/${carreraId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Error al borrar progreso de carrera");
+    return res.json();
+  },
+
   deleteProgreso: async (carreraId: string, materiaId: string) => {
     const res = await fetch(
       `${API_URL}/api/progreso/${carreraId}/${materiaId}`,
@@ -123,7 +132,10 @@ export const api = {
       credentials: "include",
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error("Error al crear carrera");
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Error al crear carrera");
+    }
     return res.json();
   },
 
