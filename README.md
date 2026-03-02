@@ -148,6 +148,7 @@ UnlockU/
 │   ├── src/
 │   │   ├── components/          # Componentes React
 │   │   │   ├── PanelUsuario.tsx
+│   │   │   ├── Canvas.tsx #Todo lo que tiene que ver con ReactFlow
 │   │   │   ├── Bienvenida.tsx     #Para cuando no hay una carrera cargada
 │   │   │   ├── Header.tsx         # Nombre de la carrera + botones
 │   │   │   ├── Login.tsx
@@ -163,7 +164,6 @@ UnlockU/
 │   │   │   ├── useAuth.ts    # Lógica de autenticación
 │   │   │   ├── useCarrera.ts    # Lógica principal del estado
 │   │   │   ├── useCarreraCustom.ts    # Para las carreras guardadas en el back
-│   │   │   ├── Progreso.ts    # Para el progreso guardado en el back
 │   │   │   └── useMaterias.ts   # Lógica de cada materia
 │   │   ├── context/
 │   │   │   ├── authContext.tsx

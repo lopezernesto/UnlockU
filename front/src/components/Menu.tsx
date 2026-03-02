@@ -264,18 +264,24 @@ export default function Menu() {
         onClose={() => setIsModalOpen(false)}
         onSave={async (datos) => {
           if (isAuthenticated && !isGuest) {
-            // Usuario logueado: guardar en backend
-            const carreraGuardada = await crearCarrera({
-              id: crypto.randomUUID(),
-              nombre: datos.nombre,
-              abreviacion: datos.abreviacion,
-              aniosDuracion: datos.anios,
-              materias: [],
-            });
-            cargarCarreraCustom(carreraGuardada.id);
+            try {
+              // Usuario logueado: guardar en backend
+              const carreraGuardada = await crearCarrera({
+                id: crypto.randomUUID(),
+                nombre: datos.nombre,
+                abreviacion: datos.abreviacion,
+                aniosDuracion: datos.anios,
+                materias: [],
+              });
+              cargarCarreraCustom(carreraGuardada.id);
+              return null;
+            } catch (err: any) {
+              return err.message;
+            }
           } else {
             // Invitado: solo localStorage
             crearNuevaCarrera(datos);
+            return null;
           }
           setIsModalOpen(false);
         }}

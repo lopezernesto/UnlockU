@@ -63,8 +63,8 @@ router.post("/", requireAuth, async (req, res) => {
       return res.status(409).json({
         error:
           existente.nombre === nombre
-            ? "Ya tenes una carrera con ese nombre"
-            : "Ya tenes una carrera con esa abreviación",
+            ? "Ya tenés una carrera con ese nombre"
+            : "Ya tenés una carrera con esa abreviación",
       });
     }
     const carrera = await prisma.carreraCustom.upsert({
@@ -75,7 +75,6 @@ router.post("/", requireAuth, async (req, res) => {
 
     res.json(carrera);
   } catch (error) {
-    console.error("Error completo:", error);
     res.status(500).json({ error: "Error al crear carrera" });
   }
 });

@@ -1,10 +1,9 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useCallback, useContext } from "react";
 import useCarrera from "../hooks/useCarrera";
-import useMaterias from "../hooks/useMaterias";
 import type { CarreraData } from "../types/Carrera";
 import type { MateriaData } from "../types/Materia";
-import type { Edge, Node, OnEdgesChange, OnNodesChange } from "@xyflow/react";
 import { useAuthContext } from "./AuthContext";
+import { recalcularEstados } from "../utils/utils";
 
 // Definimos que datos y funciones estaran disponibles en toda la app
 interface CarreraContextType {
@@ -12,15 +11,11 @@ interface CarreraContextType {
   materias: MateriaData[];
   aniosDuracion: number;
   resetKey: number;
-  nodos: Node[];
-  arcos: Edge[];
-  nodeTypes: any;
-  onNodesChange: OnNodesChange;
-  onEdgesChange: OnEdgesChange;
   isGuest: boolean;
   isAuthenticated: boolean;
 
   // Funciones de Carrera
+  actualizarMaterias: (materias: MateriaData[]) => void;
   cargarLCC: () => void;
   cargarADYSL: () => void;
   cambiarCarrera: () => void;
@@ -48,19 +43,30 @@ export function CarreraProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isGuest } = useAuthContext();
   const carrera = useCarrera(isAuthenticated, isGuest);
 
-  const materiasLogic = useMaterias({
-    materias: carrera.materias,
-    aniosDuracion: carrera.aniosDuracion,
-    actualizarMaterias: carrera.actualizarMaterias,
-    resetKey: carrera.resetKey,
-  });
+  const obtenerMateriasPrevias = useCallback(
+    (anio: number, cuatri: number) => {
+      return carrera.materias.filter(
+        (m) => m.anio < anio || (m.anio === anio && m.cuatrimestre < cuatri),
+      );
+    },
+    [carrera.materias],
+  );
+
+  const agregarMateria = useCallback(
+    (nuevaMateria: MateriaData) => {
+      const nuevaLista = [...carrera.materias, nuevaMateria];
+      carrera.actualizarMaterias(recalcularEstados(nuevaLista));
+    },
+    [carrera.materias, carrera.actualizarMaterias],
+  );
 
   const value = {
     carreraActual: carrera.carreraActual,
     materias: carrera.materias,
     aniosDuracion: carrera.aniosDuracion,
     resetKey: carrera.resetKey,
-    ...materiasLogic, // Esparcimos nodos, arcos, onNodesChange, etc.
+    obtenerMateriasPrevias,
+    agregarMateria,
     cargarLCC: carrera.cargarCarreraLCC,
     cargarADYSL: carrera.cargarTecnicaturaADYSL,
     cambiarCarrera: carrera.cambiarCarrera,
@@ -69,6 +75,7 @@ export function CarreraProvider({ children }: { children: React.ReactNode }) {
     crearNuevaCarrera: carrera.crearNuevaCarrera,
     cargarCarreraCustom: carrera.cargarCarreraCustom,
     resetearPosiciones: carrera.resetearPosiciones,
+    actualizarMaterias: carrera.actualizarMaterias,
     isAuthenticated,
     isGuest,
   };

@@ -35,8 +35,7 @@ export const MateriaNode = memo(function MateriaNode({
   const [modalEstados, setModalEstados] = useState<TipoModal>(null);
   const [mostrarBarra, setMostrarBarra] = useState(true);
 
-  const { materias: todasLasMaterias, obtenerMateriasPrevias } =
-    useCarreraContext();
+  const { materias: todasLasMaterias } = useCarreraContext();
   // Calcular progreso de correlativas
   const calcularProgreso = () => {
     const totalCorrelativas =
@@ -79,15 +78,6 @@ export const MateriaNode = memo(function MateriaNode({
       setMostrarBarra(false);
     }
   }, [data.estado, progreso.porcentaje, progresoAnterior]);
-
-  // Efecto para cuando habilitas una materia
-  useEffect(() => {
-    if (data.estado === "HABILITADA") {
-      setIsUnlocking(true);
-      const timer = setTimeout(() => setIsUnlocking(false), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [data.estado]);
 
   // Efecto para cuando habilitas una materia
   useEffect(() => {
@@ -350,8 +340,6 @@ export const MateriaNode = memo(function MateriaNode({
           materia={data}
           onClose={() => setModalEdicion(false)}
           onGuardar={data.editar}
-          obtenerMateriasPrevias={obtenerMateriasPrevias}
-          todasLasMaterias={todasLasMaterias}
         />
       )}
 

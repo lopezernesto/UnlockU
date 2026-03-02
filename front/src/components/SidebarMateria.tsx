@@ -49,6 +49,16 @@ export default function SidebarMateria({ isOpen, onClose }: Props) {
     correlativasF,
   ]);
 
+  const reiniciarEstados = () => {
+    setNombre("");
+    setAnio(1);
+    setCuatri(1);
+    setBusqueda("");
+    setTabCorrelativa("cursada");
+    setCorrelativasC([]);
+    setCorrelativasF([]);
+    setErrorNombre(null);
+  };
   //Agregar materia
   const handleCrear = () => {
     if (!nombre.trim()) return;
@@ -76,9 +86,7 @@ export default function SidebarMateria({ isOpen, onClose }: Props) {
     agregarMateria(nuevaMateria);
 
     // Resetear estados y cerrar
-    setNombre("");
-    setCorrelativasC([]);
-    setCorrelativasF([]);
+    reiniciarEstados();
     onClose();
   };
 
@@ -104,7 +112,10 @@ export default function SidebarMateria({ isOpen, onClose }: Props) {
           Nueva Materia
         </h2>
         <button
-          onClick={onClose}
+          onClick={() => {
+            reiniciarEstados();
+            onClose();
+          }}
           className="text-white/40 hover:text-white transition-colors"
         >
           <X size={20} />

@@ -61,16 +61,6 @@ export default function useMaterias({
 
   // ABM DE MATERIAS
 
-  // Agregar
-  const agregarMateria = useCallback(
-    (nuevaMateria: MateriaData) => {
-      setMaterias((prev) => {
-        const nuevaLista = [...prev, nuevaMateria];
-        return recalcularEstados(nuevaLista);
-      });
-    },
-    [setMaterias],
-  );
   // Borrar
   const borrarMateria = useCallback(
     (idABorrar: string) => {
@@ -202,16 +192,6 @@ export default function useMaterias({
       });
     },
     [setMaterias],
-  );
-
-  // Para el filtro de materias en el Sidebar, solo mostrara materias que pueden ser correlativas
-  const obtenerMateriasPrevias = useCallback(
-    (anio: number, cuatri: number) => {
-      return materias.filter(
-        (m) => m.anio < anio || (m.anio === anio && m.cuatrimestre < cuatri),
-      );
-    },
-    [materias],
   );
 
   //Logica de arcos automaticos
@@ -368,7 +348,6 @@ export default function useMaterias({
     resetearMateria,
     borrarMateria,
     editarMateria,
-    obtenerMateriasPrevias,
   ]);
 
   return {
@@ -377,7 +356,5 @@ export default function useMaterias({
     nodeTypes,
     onNodesChange,
     onEdgesChange,
-    agregarMateria,
-    obtenerMateriasPrevias,
   };
 }

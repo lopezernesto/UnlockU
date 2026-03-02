@@ -9,7 +9,7 @@ interface Props {
     abreviacion: string;
     anios: number;
     id?: string;
-  }) => void;
+  }) => Promise<string | null>;
   initialData?: { nombre: string; abreviacion: string; anios: number };
 }
 
@@ -25,16 +25,38 @@ export default function ModalCrearCarrera({
   );
   const [anios, setAnios] = useState(initialData?.anios || 5);
 
-  if (!isOpen) return null;
+  const [errorNombre, setErrorNombre] = useState<string | null>(null);
+  const [errorAbreviacion, setErrorAbreviacion] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nombre || !abreviacion) return alert("Completá los campos che!");
-    onSave({ nombre, abreviacion, anios });
-    onClose();
+  if (!isOpen) return null;
+  const reiniciarCampos = () => {
     setNombre("");
     setAbreviacion("");
     setAnios(5);
+    setErrorAbreviacion(null);
+    setErrorNombre(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorNombre(null);
+    setErrorAbreviacion(null);
+
+    if (!nombre || !abreviacion) {
+      if (!nombre) setErrorNombre("El nombre es obligatorio");
+      if (!abreviacion) setErrorAbreviacion("La abreviación es obligatoria");
+      return;
+    }
+
+    const error = await onSave({ nombre, abreviacion, anios });
+
+    if (error) {
+      if (error.toLowerCase().includes("nombre")) setErrorNombre(error);
+      else setErrorAbreviacion(error);
+      return;
+    }
+    onClose();
+    reiniciarCampos();
   };
 
   return (
@@ -45,7 +67,10 @@ export default function ModalCrearCarrera({
             Configurar Carrera
           </h2>
           <button
-            onClick={onClose}
+            onClick={() => {
+              onClose();
+              reiniciarCampos();
+            }}
             className="text-white/40 hover:text-white transition-colors"
           >
             <X size={20} />
@@ -61,9 +86,12 @@ export default function ModalCrearCarrera({
               type="text"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition-colors"
+              className={`w-full bg-white/5 border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition-colors ${errorNombre ? "border-red-500/50" : "border-white/10"}`}
               placeholder="Ej: Ingeniería en Sistemas"
             />
+            {errorNombre && (
+              <p className="text-red-400 text-[11px] mt-1">{errorNombre}</p>
+            )}
           </div>
 
           <div className="flex gap-4">
@@ -76,9 +104,14 @@ export default function ModalCrearCarrera({
                 maxLength={5}
                 value={abreviacion}
                 onChange={(e) => setAbreviacion(e.target.value.toUpperCase())}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                className={`w-full bg-white/5 border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition-colors ${errorAbreviacion ? "border-red-500/50" : "border-white/10"}`}
                 placeholder="Ej: ISI"
               />
+              {errorAbreviacion && (
+                <p className="text-red-400 text-[11px] mt-1">
+                  {errorAbreviacion}
+                </p>
+              )}
             </div>
             <div className="w-1/3">
               <label className="block text-sm font-medium text-white/60 mb-1">

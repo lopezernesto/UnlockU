@@ -1,14 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { X, Search, Plus } from "lucide-react";
 import type { MateriaData } from "../types/Materia";
+import { useCarreraContext } from "../context/CarreraContext";
 
 interface Props {
   materia: MateriaData | null; // null = modal cerrado
   aniosDuracion: number;
   onClose: () => void;
   onGuardar: (id: string, cambios: Partial<MateriaData>) => void;
-  obtenerMateriasPrevias: (anio: number, cuatri: number) => MateriaData[];
-  todasLasMaterias: MateriaData[];
 }
 
 export default function ModalEditarMateria({
@@ -16,9 +15,9 @@ export default function ModalEditarMateria({
   aniosDuracion,
   onClose,
   onGuardar,
-  obtenerMateriasPrevias,
-  todasLasMaterias,
 }: Props) {
+  const { materias: todasLasMaterias, obtenerMateriasPrevias } =
+    useCarreraContext();
   const [nombre, setNombre] = useState(materia?.nombre || "");
   const [anio, setAnio] = useState(materia?.anio || 1);
   const [cuatri, setCuatri] = useState<1 | 2>(
