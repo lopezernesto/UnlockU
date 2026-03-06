@@ -16,6 +16,7 @@ export function useCarrerasCustom(isAuthenticated: boolean, isGuest: boolean) {
         nombre: c.nombre,
         abreviacion: c.abreviacion,
         aniosDuracion: c.aniosDuracion,
+        updatedAt: c.updatedAt,
       })) as CarreraResumen[];
     },
     enabled: isAuthenticated && !isGuest,

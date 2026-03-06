@@ -1,7 +1,7 @@
 import type { CarreraData } from "../types/Carrera";
 import type { MateriaData } from "../types/Materia";
 
-const materiasTUADYSL: MateriaData[] = [
+const materiasTUASSL: MateriaData[] = [
   {
     ////////////////// PRIMER AÑO //////////////////
     // ===== Primer Cuatrimestre =====
@@ -147,11 +147,11 @@ const materiasTUADYSL: MateriaData[] = [
   },
 ];
 
-export const carreraTUADYSL: CarreraData = {
-  id: "tuadysl",
+export const carreraTUASSL: CarreraData = {
+  id: "TUASSL",
   nombre:
     "Tecnicatura Universitaria en Administración de Sistemas y Software Libre",
-  abreviacion: "TUADYSL",
+  abreviacion: "TUASSL",
   aniosDuracion: 3,
-  materias: materiasTUADYSL,
+  materias: materiasTUASSL,
 };

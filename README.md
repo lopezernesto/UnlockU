@@ -34,18 +34,18 @@ _Se planean agregar más carreras en futuras versiones_
 
 ### Vista General
 
-![Vista completa del plan](./screenshots/Bienvenida.png)
+![Vista completa del plan](./front/screenshots/Bienvenida.png)
 ![Vista completa del plan](./screenshots/VistaGeneral.png)
 
 ### Estados y Progreso
 
-![Diferentes estados](./screenshots/Estados.png)
-![Materias bloqueadas](./screenshots/Bloqueadas.png)
+![Diferentes estados](./front/screenshots/Estados.png)
+![Materias bloqueadas](./front/screenshots/Bloqueadas.png)
 
 ### Gestión de Materias
 
-![Modal de edición](./screenshots/ModalEditar.png)
-![Sidebar de agregar materia](./screenshots/AgregarMateria.png)
+![Modal de edición](./front/screenshots/ModalEditar.png)
+![Sidebar de agregar materia](./front/screenshots/AgregarMateria.png)
 
 ---
 
@@ -159,6 +159,7 @@ UnlockU/
 │   │   │   ├── ModalEstadoMateria.tsx
 │   │   │   ├── ModalConfirmacion.tsx
 │   │   │   ├── ModalCrearCarrera.tsx
+│   │   │   ├── ModalCarreras.tsx # Panel para mostrar las carreras guardadas
 │   │   │   └── Separador.tsx    # Títulos de año
 │   │   ├── hooks/
 │   │   │   ├── useAuth.ts    # Lógica de autenticación
@@ -175,7 +176,7 @@ UnlockU/
 │   │   │   └── utils.ts #Funciones compartidas
 │   │   ├── data/
 │   │   │   ├── LCC.ts           # Plan de LCC completo
-│   │   │   ├── TUADYSL.ts       # Plan de TUADYSL completo
+│   │   │   ├── TUASSL.ts       # Plan de TUASSL completo
 │   │   │   └── MateriasIniciales.ts  # Datos de prueba
 │   │   ├── App.tsx              # Componente principal
 │   │   ├── main.tsx             # Entry point

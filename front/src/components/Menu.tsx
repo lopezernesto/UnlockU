@@ -14,7 +14,8 @@ import { ModalConfirmar } from "./ModalConfirmacion";
 import { useCarrerasCustom } from "../hooks/useCarreraCustom";
 import { api } from "../services/api";
 import { carreraLCC } from "../data/LCC";
-import { carreraTUADYSL } from "../data/TUADYSL";
+import { carreraTUASSL } from "../data/TUASSL";
+import ModalCarreras from "./ModalCarreras";
 
 type MenuLevel = "INICIO" | "MIS_CARRERAS";
 
@@ -36,14 +37,21 @@ export default function Menu() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmar, setIsConfirmar] = useState(false);
   const [carreraAConfirmar, setCarreraAConfirmar] = useState<
-    "LCC" | "TUADYSL" | null
+    "LCC" | "TUASSL" | null
   >(null);
+  const [isModalCarrerasOpen, setIsModalCarrerasOpen] = useState(false);
+
   const hayCarrera = carreraActual !== null;
 
   const { carreras: carrerasCustom, crearCarrera } = useCarrerasCustom(
     isAuthenticated,
     isGuest,
   );
+
+  // Ordenar por más recientes y tomar las 3 últimas
+  const carrerasRecientes = [...carrerasCustom]
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .slice(0, 3);
 
   return (
     <>
@@ -115,8 +123,8 @@ export default function Menu() {
                     onClick={async () => {
                       if (isAuthenticated && !isGuest) {
                         try {
-                          await api.getCarrera(carreraTUADYSL.id);
-                          setCarreraAConfirmar("TUADYSL");
+                          await api.getCarrera(carreraTUASSL.id);
+                          setCarreraAConfirmar("TUASSL");
                         } catch {
                           cargarADYSL();
                         }
@@ -128,7 +136,7 @@ export default function Menu() {
                   >
                     <Library size={20} />
                     <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                      TUADYSL
+                      TUASSL
                     </span>
                   </button>
                   <button
@@ -189,7 +197,7 @@ export default function Menu() {
                   </button>
                   <div className="h-px w-full bg-white/10" />
                   {/* Lista de Recientes */}
-                  {carrerasCustom.map((c) => (
+                  {carrerasRecientes.map((c) => (
                     <button
                       key={c.id}
                       onClick={() => {
@@ -203,6 +211,17 @@ export default function Menu() {
                       </span>
                     </button>
                   ))}
+                  {carrerasCustom.length > 3 && (
+                    <button
+                      onClick={() => setIsModalCarrerasOpen(true)}
+                      className="text-white/40 hover:text-white/80 flex flex-col items-center gap-1 group"
+                    >
+                      <span className="text-[10px]">•••</span>
+                      <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+                        Ver todas
+                      </span>
+                    </button>
+                  )}
                   <button
                     className="text-white/60 hover:text-green-400 flex flex-col items-center gap-1 group"
                     onClick={() => setIsModalOpen(true)}
@@ -249,8 +268,8 @@ export default function Menu() {
               api.deletePosiciones(carreraLCC.id).catch(() => {});
               cargarLCC();
             } else {
-              api.deleteProgresoCarrera(carreraTUADYSL.id).catch(() => {});
-              api.deletePosiciones(carreraTUADYSL.id).catch(() => {});
+              api.deleteProgresoCarrera(carreraTUASSL.id).catch(() => {});
+              api.deletePosiciones(carreraTUASSL.id).catch(() => {});
               cargarADYSL();
             }
             setCarreraAConfirmar(null);
@@ -283,8 +302,13 @@ export default function Menu() {
             crearNuevaCarrera(datos);
             return null;
           }
-          setIsModalOpen(false);
         }}
+      />
+      <ModalCarreras
+        isOpen={isModalCarrerasOpen}
+        onClose={() => setIsModalCarrerasOpen(false)}
+        carreras={carrerasCustom}
+        onSeleccionar={(id) => cargarCarreraCustom(id)}
       />
     </>
   );

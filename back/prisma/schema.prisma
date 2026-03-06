@@ -54,6 +54,7 @@ model CarreraCustom {
   abreviacion   String
   aniosDuracion Int
   materias      Json
+  updatedAt DateTime @updatedAt
   creadoEn      DateTime @default(now())
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)

@@ -15,6 +15,7 @@ export function ModalAccionEstado({
 }: AccionProps) {
   const [anio, setAnio] = useState(new Date().getFullYear().toString());
   const [nota, setNota] = useState(7);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
@@ -31,10 +32,13 @@ export function ModalAccionEstado({
               <label className="text-xs text-white/40 block mb-2">Año</label>
               <input
                 type="number"
-                className="nodrag nopan w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white outline-none focus:border-blue-500 transition-colors"
+                className={`${error ? "border-red-500" : "border-white/10"} nodrag nopan w-full bg-white/5 border rounded-lg p-3 text-white outline-none focus:border-blue-500 transition-colors`}
                 value={anio}
                 onChange={(e) => setAnio(e.target.value)}
               />
+              {error && (
+                <p className="text-red-400 text-[11px] mt-1">{error}</p>
+              )}
             </div>
 
             {tipo === "APROBAR" && (
@@ -60,9 +64,19 @@ export function ModalAccionEstado({
               Cancelar
             </button>
             <button
-              onClick={() =>
-                onConfirm({ anio, nota: tipo === "APROBAR" ? nota : undefined })
-              }
+              onClick={() => {
+                if (
+                  Number(anio) > 1900 &&
+                  Number(anio) <= new Date().getFullYear()
+                ) {
+                  onConfirm({
+                    anio,
+                    nota: tipo === "APROBAR" ? nota : undefined,
+                  });
+                } else {
+                  setError("Ingrese un año válido");
+                }
+              }}
               className={`px-8 py-3 rounded-xl font-bold text-white transition-all active:scale-95 ${
                 tipo === "APROBAR"
                   ? "bg-green-600 hover:bg-green-700"

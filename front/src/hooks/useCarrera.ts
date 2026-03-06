@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { carreraLCC } from "../data/LCC";
-import { carreraTUADYSL } from "../data/TUADYSL";
+import { carreraTUASSL } from "../data/TUASSL";
 import type { CarreraData } from "../types/Carrera";
 import type { EstadoMateria, MateriaData } from "../types/Materia";
 import { api } from "../services/api";
@@ -67,6 +67,11 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
               aniosDuracion: prev.aniosDuracion,
               materias: materiasLimpias,
             })
+            .then(() => {
+              queryClient.invalidateQueries({
+                queryKey: ["carreras", "custom"],
+              });
+            })
             .catch(console.error);
 
           nuevasMaterias.forEach((nueva) => {
@@ -84,6 +89,11 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
                     nueva.estado === "APROBADA"
                       ? nueva.anioFinal
                       : nueva.anioCursada,
+                })
+                .then(() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["carreras", "custom"],
+                  });
                 })
                 .catch(console.error);
             } else {
@@ -187,9 +197,9 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     if (debeUsarBackend) {
       try {
         const [carrera, progreso, posiciones] = await Promise.all([
-          api.getCarrera(carreraTUADYSL.id),
-          api.getProgreso(carreraTUADYSL.id),
-          api.getPosiciones(carreraTUADYSL.id),
+          api.getCarrera(carreraTUASSL.id),
+          api.getProgreso(carreraTUASSL.id),
+          api.getPosiciones(carreraTUASSL.id),
         ]);
         const carreraConProgreso = aplicarProgreso(carrera, progreso);
         setTimeout(() => {
@@ -205,20 +215,20 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
         }, 0);
       } catch {
         // Primera vez: guardar la estructura en el back y cargar sin progreso
-        await api.deleteProgresoCarrera(carreraTUADYSL.id).catch(() => {});
+        await api.deleteProgresoCarrera(carreraTUASSL.id).catch(() => {});
         await api.saveCarrera({
-          id: carreraTUADYSL.id,
-          nombre: carreraTUADYSL.nombre,
-          abreviacion: carreraTUADYSL.abreviacion,
-          aniosDuracion: carreraTUADYSL.aniosDuracion,
-          materias: carreraTUADYSL.materias,
+          id: carreraTUASSL.id,
+          nombre: carreraTUASSL.nombre,
+          abreviacion: carreraTUASSL.abreviacion,
+          aniosDuracion: carreraTUASSL.aniosDuracion,
+          materias: carreraTUASSL.materias,
         });
         queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
-        setTimeout(() => setCarreraActual(carreraTUADYSL), 0);
+        setTimeout(() => setCarreraActual(carreraTUASSL), 0);
       }
     } else {
       setTimeout(() => {
-        setCarreraActual(carreraTUADYSL);
+        setCarreraActual(carreraTUASSL);
       }, 0);
     }
   }, [limpiarLocalStorage, debeUsarBackend]);

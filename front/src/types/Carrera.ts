@@ -12,5 +12,5 @@ export interface CarreraResumen {
   nombre: string;
   abreviacion: string;
   aniosDuracion: number;
-  //updatedAt: number; proximamente para lo de las carreras recientes de los users
+  updatedAt: string;
 }
