@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X, Pencil, Trash2 } from "lucide-react";
 import type { CarreraResumen } from "../types/Carrera";
 
 interface Props {
@@ -6,6 +6,8 @@ interface Props {
   onClose: () => void;
   carreras: CarreraResumen[];
   onSeleccionar: (id: string) => void;
+  onEditar: (carrera: CarreraResumen) => void;
+  onBorrar: (carrera: CarreraResumen) => void;
 }
 
 export default function ModalCarreras({
@@ -13,6 +15,8 @@ export default function ModalCarreras({
   onClose,
   carreras,
   onSeleccionar,
+  onEditar,
+  onBorrar,
 }: Props) {
   if (!isOpen) return null;
 
@@ -39,21 +43,42 @@ export default function ModalCarreras({
         {/* Lista */}
         <div className="overflow-y-auto flex-1 p-3 space-y-2 scrollbar-hide">
           {carreras.map((c) => (
-            <button
+            <div
               key={c.id}
-              onClick={() => {
-                onSeleccionar(c.id);
-                onClose();
-              }}
               className="w-full flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 transition-all group"
             >
-              <span className="w-12 h-12 rounded-full bg-blue-600/20 border border-blue-500/50 text-blue-400 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                {c.abreviacion}
-              </span>
-              <span className="text-white/70 group-hover:text-white text-sm text-left transition-colors truncate">
-                {c.nombre}
-              </span>
-            </button>
+              {/* Círculo + nombre: cargan la carrera */}
+              <button
+                onClick={() => {
+                  onSeleccionar(c.id);
+                  onClose();
+                }}
+                className="flex items-center gap-4 flex-1 min-w-0"
+              >
+                <span className="w-12 h-12 rounded-full bg-blue-600/20 border border-blue-500/50 text-blue-400 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  {c.abreviacion}
+                </span>
+                <span className="text-white/70 group-hover:text-white text-sm text-left transition-colors truncate">
+                  {c.nombre}
+                </span>
+              </button>
+
+              {/* Botones editar/borrar */}
+              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                <button
+                  onClick={() => onEditar(c)}
+                  className="text-white/40 hover:text-blue-400 transition-colors p-1"
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  onClick={() => onBorrar(c)}
+                  className="text-white/40 hover:text-red-400 transition-colors p-1"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       </div>

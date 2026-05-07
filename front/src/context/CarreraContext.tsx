@@ -17,7 +17,9 @@ interface CarreraContextType {
   // Funciones de Carrera
   actualizarMaterias: (materias: MateriaData[]) => void;
   cargarLCC: () => void;
-  cargarADYSL: () => void;
+  cargarLSI: () => void;
+  cargarTUASSL: () => void;
+  cargarTUDW: () => void;
   cambiarCarrera: () => void;
   importarProgreso: (file: File) => void;
   exportarProgreso: () => void;
@@ -68,7 +70,9 @@ export function CarreraProvider({ children }: { children: React.ReactNode }) {
     obtenerMateriasPrevias,
     agregarMateria,
     cargarLCC: carrera.cargarCarreraLCC,
-    cargarADYSL: carrera.cargarTecnicaturaADYSL,
+    cargarLSI: carrera.cargarCarreraLSI,
+    cargarTUASSL: carrera.cargarTecnicaturaTUASSL,
+    cargarTUDW: carrera.cargarTecnicaturaTUDW,
     cambiarCarrera: carrera.cambiarCarrera,
     importarProgreso: carrera.importarProgreso,
     exportarProgreso: carrera.exportarProgreso,

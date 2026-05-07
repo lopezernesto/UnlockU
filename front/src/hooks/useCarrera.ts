@@ -1,6 +1,9 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { carreraLCC } from "../data/LCC";
+import { carreraLSI } from "../data/LSI";
 import { carreraTUASSL } from "../data/TUASSL";
+import { carreraTUDW } from "../data/TUDW";
+
 import type { CarreraData } from "../types/Carrera";
 import type { EstadoMateria, MateriaData } from "../types/Materia";
 import { api } from "../services/api";
@@ -192,7 +195,45 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     }
   }, [limpiarLocalStorage, debeUsarBackend]);
 
-  const cargarTecnicaturaADYSL = useCallback(async () => {
+  const cargarCarreraLSI = useCallback(async () => {
+    limpiarLocalStorage();
+    if (debeUsarBackend) {
+      try {
+        const [carrera, progreso, posiciones] = await Promise.all([
+          api.getCarrera(carreraLSI.id),
+          api.getProgreso(carreraLSI.id),
+          api.getPosiciones(carreraLSI.id),
+        ]);
+        const carreraConProgreso = aplicarProgreso(carrera, progreso);
+        setTimeout(() => {
+          const posicionesMap: Record<string, { x: number; y: number }> = {};
+          posiciones.forEach((p: any) => {
+            posicionesMap[p.materiaId] = { x: p.x, y: p.y };
+          });
+          localStorage.setItem(
+            "nodos-posiciones",
+            JSON.stringify(posicionesMap),
+          );
+          setCarreraActual(carreraConProgreso);
+        }, 0);
+      } catch {
+        // Primera vez: guardar la estructura en el back y cargar sin progreso
+        await api.saveCarrera({
+          id: carreraLSI.id,
+          nombre: carreraLSI.nombre,
+          abreviacion: carreraLSI.abreviacion,
+          aniosDuracion: carreraLSI.aniosDuracion,
+          materias: carreraLSI.materias,
+        });
+        queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
+        setTimeout(() => setCarreraActual(carreraLSI), 0);
+      }
+    } else {
+      setTimeout(() => setCarreraActual(carreraLSI), 0);
+    }
+  }, [limpiarLocalStorage, debeUsarBackend]);
+
+  const cargarTecnicaturaTUASSL = useCallback(async () => {
     limpiarLocalStorage();
     if (debeUsarBackend) {
       try {
@@ -229,6 +270,47 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     } else {
       setTimeout(() => {
         setCarreraActual(carreraTUASSL);
+      }, 0);
+    }
+  }, [limpiarLocalStorage, debeUsarBackend]);
+
+  const cargarTecnicaturaTUDW = useCallback(async () => {
+    limpiarLocalStorage();
+    if (debeUsarBackend) {
+      try {
+        const [carrera, progreso, posiciones] = await Promise.all([
+          api.getCarrera(carreraTUDW.id),
+          api.getProgreso(carreraTUDW.id),
+          api.getPosiciones(carreraTUDW.id),
+        ]);
+        const carreraConProgreso = aplicarProgreso(carrera, progreso);
+        setTimeout(() => {
+          const posicionesMap: Record<string, { x: number; y: number }> = {};
+          posiciones.forEach((p: any) => {
+            posicionesMap[p.materiaId] = { x: p.x, y: p.y };
+          });
+          localStorage.setItem(
+            "nodos-posiciones",
+            JSON.stringify(posicionesMap),
+          );
+          setCarreraActual(carreraConProgreso);
+        }, 0);
+      } catch {
+        // Primera vez: guardar la estructura en el back y cargar sin progreso
+        await api.deleteProgresoCarrera(carreraTUDW.id).catch(() => {});
+        await api.saveCarrera({
+          id: carreraTUDW.id,
+          nombre: carreraTUDW.nombre,
+          abreviacion: carreraTUDW.abreviacion,
+          aniosDuracion: carreraTUDW.aniosDuracion,
+          materias: carreraTUDW.materias,
+        });
+        queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
+        setTimeout(() => setCarreraActual(carreraTUDW), 0);
+      }
+    } else {
+      setTimeout(() => {
+        setCarreraActual(carreraTUDW);
       }, 0);
     }
   }, [limpiarLocalStorage, debeUsarBackend]);
@@ -304,7 +386,9 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     resetKey,
     cambiarCarrera,
     cargarCarreraLCC,
-    cargarTecnicaturaADYSL,
+    cargarCarreraLSI,
+    cargarTecnicaturaTUASSL,
+    cargarTecnicaturaTUDW,
     importarProgreso,
     exportarProgreso,
     actualizarMaterias,

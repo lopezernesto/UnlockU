@@ -5,6 +5,7 @@ interface ConfirmarProps {
   colorBoton: string;
   onConfirm: () => void;
   onClose: () => void;
+  zIndex?: string;
 }
 
 export function ModalConfirmar({
@@ -14,9 +15,12 @@ export function ModalConfirmar({
   colorBoton,
   onConfirm,
   onClose,
+  zIndex = "z-[100]",
 }: ConfirmarProps) {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 glow">
+    <div
+      className={`fixed inset-0 ${zIndex} flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 glow`}
+    >
       <div className="bg-slate-900 border border-white/10 p-6 rounded-2xl shadow-2xl min-w-[500px]">
         <div className="flex items-center gap-6">
           <div className="flex-1">

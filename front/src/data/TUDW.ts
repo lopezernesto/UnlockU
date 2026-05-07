@@ -1,12 +1,12 @@
 import type { CarreraData } from "../types/Carrera";
 import type { MateriaData } from "../types/Materia";
 
-const materiasTUASSL: MateriaData[] = [
+const materiasTUDW: MateriaData[] = [
+  ////////////////// PRIMER AÑO //////////////////
+  // ===== Primer Cuatrimestre =====
   {
-    ////////////////// PRIMER AÑO //////////////////
-    // ===== Primer Cuatrimestre =====
     id: "1",
-    nombre: "Introducción a la Computación",
+    nombre: "Matemática General",
     anio: 1,
     cuatrimestre: 1,
     estado: "HABILITADA",
@@ -15,13 +15,14 @@ const materiasTUASSL: MateriaData[] = [
   },
   {
     id: "2",
-    nombre: "Matemática General",
+    nombre: "Introducción a la Programación",
     anio: 1,
     cuatrimestre: 1,
     estado: "HABILITADA",
     correlativasCursada: [],
     correlativasFinal: [],
   },
+
   {
     id: "3",
     nombre: "Inglés Técnico",
@@ -34,124 +35,106 @@ const materiasTUASSL: MateriaData[] = [
   // ===== Segundo Cuatrimestre =====
   {
     id: "4",
-    nombre: "Introducción a la Programación",
+    nombre: "Programación Estática y Laboratorio Web",
     anio: 1,
     cuatrimestre: 2,
     estado: "HABILITADA",
-    correlativasCursada: [],
+    correlativasCursada: ["2"],
     correlativasFinal: [],
   },
   {
     id: "5",
-    nombre: "Introducción a la Administración de Sistemas",
+    nombre: "Introducción a la Programación Orientada a Objetos",
+    anio: 1,
+    cuatrimestre: 2,
+    estado: "BLOQUEADA",
+    correlativasCursada: ["2"],
+    correlativasFinal: [],
+  },
+  {
+    id: "6",
+    nombre: "Conceptos de Bases de Datos",
     anio: 1,
     cuatrimestre: 2,
     estado: "BLOQUEADA",
     correlativasCursada: ["1", "3"],
     correlativasFinal: [],
   },
-  {
-    id: "6",
-    nombre: "Redes de Datos",
-    anio: 1,
-    cuatrimestre: 2,
-    estado: "BLOQUEADA",
-    correlativasCursada: ["1", "2"],
-    correlativasFinal: [],
-  },
   ////////////////// SEGUNDO AÑO //////////////////
   // ===== Primer Cuatrimestre =====
   {
     id: "7",
-    nombre: "Software Libre",
+    nombre: "Programacion Web Dinámica",
+    anio: 2,
+    cuatrimestre: 1,
+    estado: "BLOQUEADA",
+    correlativasCursada: ["4", "5", "6"],
+    correlativasFinal: [],
+  },
+  {
+    id: "8",
+    nombre: "Arquitectura y Seguridad de Computadoras",
+    anio: 2,
+    cuatrimestre: 1,
+    estado: "BLOQUEADA",
+    correlativasCursada: ["1", "3"],
+    correlativasFinal: [],
+  },
+  {
+    id: "9",
+    nombre: "Diseño Gráfico",
     anio: 2,
     cuatrimestre: 1,
     estado: "BLOQUEADA",
     correlativasCursada: ["4"],
     correlativasFinal: [],
   },
-  {
-    id: "8",
-    nombre: "Taller de Hardware y Software",
-    anio: 2,
-    cuatrimestre: 1,
-    estado: "BLOQUEADA",
-    correlativasCursada: ["5"],
-    correlativasFinal: [],
-  },
-  {
-    id: "9",
-    nombre: "Administración de Sistemas",
-    anio: 2,
-    cuatrimestre: 1,
-    estado: "BLOQUEADA",
-    correlativasCursada: ["4", "6"],
-    correlativasFinal: [],
-  },
   // ===== Segundo Cuatrimestre =====
   {
     id: "10",
-    nombre: "Administración de Servicios",
+    nombre: "Programación Web Avanzada",
     anio: 2,
     cuatrimestre: 2,
     estado: "BLOQUEADA",
-    correlativasCursada: ["5", "9"],
+    correlativasCursada: ["7"],
     correlativasFinal: [],
   },
   {
     id: "11",
-    nombre: "Sistemas de Información",
+    nombre: "Análisis, Diseño y Documentación de Sistemas",
     anio: 2,
     cuatrimestre: 2,
     estado: "BLOQUEADA",
-    correlativasCursada: ["5"],
+    correlativasCursada: ["5", "6"],
     correlativasFinal: [],
   },
-  {
-    id: "12",
-    nombre: "Automatización y Scripting",
-    anio: 2,
-    cuatrimestre: 2,
-    estado: "BLOQUEADA",
-    correlativasCursada: ["4", "5", "9"],
-    correlativasFinal: [],
-  },
+
   ////////////////// TERCER AÑO //////////////////
   // ===== Primer Cuatrimestre =====
   {
-    id: "13",
-    nombre: "Administración de Sistemas Avanzada",
-    anio: 3,
-    cuatrimestre: 1,
-    estado: "BLOQUEADA",
-    correlativasCursada: ["12"],
-    correlativasFinal: [],
-  },
-  {
-    id: "14",
-    nombre: "Aplicaciones Libres",
-    anio: 3,
-    cuatrimestre: 1,
-    estado: "BLOQUEADA",
-    correlativasCursada: ["7", "8"],
-    correlativasFinal: [],
-  },
-  {
-    id: "15",
-    nombre: "Electiva",
-    anio: 3,
-    cuatrimestre: 1,
+    id: "12",
+    nombre: "Framework e Interoperabilidad",
+    anio: 2,
+    cuatrimestre: 2,
     estado: "BLOQUEADA",
     correlativasCursada: ["10"],
     correlativasFinal: [],
   },
+  {
+    id: "13",
+    nombre: "Trabajo Final Tecnicatura en Desarrollo Web",
+    anio: 3,
+    cuatrimestre: 1,
+    estado: "BLOQUEADA",
+    correlativasCursada: ["8", "9", "10", "11"],
+    correlativasFinal: [],
+  },
 ];
 
-export const carreraTUASSL: CarreraData = {
-  id: "TUASSL",
-  nombre:
-    "Tecnicatura Universitaria en Administración de Sistemas y Software Libre",
-  abreviacion: "TUASSL",
+export const carreraTUDW: CarreraData = {
+  id: "TUDW",
+  nombre: "Tecnicatura Universitaria en Dessarrollo WEB",
+  abreviacion: "TUDW",
   aniosDuracion: 3,
-  materias: materiasTUASSL,
+  materias: materiasTUDW,
 };

@@ -6,6 +6,8 @@ import {
   BarChart3,
   ChevronLeft,
   GraduationCap,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import SidebarMateria from "./SidebarMateria";
 import { useCarreraContext } from "../context/CarreraContext";
@@ -15,7 +17,11 @@ import { useCarrerasCustom } from "../hooks/useCarreraCustom";
 import { api } from "../services/api";
 import { carreraLCC } from "../data/LCC";
 import { carreraTUASSL } from "../data/TUASSL";
+import { carreraLSI } from "../data/LSI";
+import { carreraTUDW } from "../data/TUDW";
 import ModalCarreras from "./ModalCarreras";
+import type { CarreraResumen } from "../types/Carrera";
+import ModalEditarCarrera from "./ModalEditarCarrera";
 
 type MenuLevel = "INICIO" | "MIS_CARRERAS";
 
@@ -23,7 +29,9 @@ export default function Menu() {
   const {
     carreraActual,
     cargarLCC,
-    cargarADYSL,
+    cargarLSI,
+    cargarTUASSL,
+    cargarTUDW,
     importarProgreso,
     cambiarCarrera,
     crearNuevaCarrera,
@@ -37,16 +45,23 @@ export default function Menu() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmar, setIsConfirmar] = useState(false);
   const [carreraAConfirmar, setCarreraAConfirmar] = useState<
-    "LCC" | "TUASSL" | null
+    "LCC" | "TUASSL" | "TUDW" | "LSI" | null
   >(null);
   const [isModalCarrerasOpen, setIsModalCarrerasOpen] = useState(false);
+  const [carreraEditando, setCarreraEditando] = useState<CarreraResumen | null>(
+    null,
+  );
+  const [carreraAEliminar, setCarreraAEliminar] =
+    useState<CarreraResumen | null>(null);
 
   const hayCarrera = carreraActual !== null;
 
-  const { carreras: carrerasCustom, crearCarrera } = useCarrerasCustom(
-    isAuthenticated,
-    isGuest,
-  );
+  const {
+    carreras: carrerasCustom,
+    crearCarrera,
+    actualizarCarrera,
+    borrarCarrera,
+  } = useCarrerasCustom(isAuthenticated, isGuest);
 
   // Ordenar por más recientes y tomar las 3 últimas
   const carrerasRecientes = [...carrerasCustom]
@@ -119,6 +134,48 @@ export default function Menu() {
                       LCC
                     </span>
                   </button>
+
+                  <button
+                    onClick={async () => {
+                      if (isAuthenticated && !isGuest) {
+                        try {
+                          await api.getCarrera(carreraLSI.id);
+                          setCarreraAConfirmar("LSI");
+                        } catch {
+                          cargarLSI();
+                        }
+                      } else {
+                        cargarLSI();
+                      }
+                    }}
+                    className="text-white/60 hover:text-cyan-400 flex flex-col items-center gap-1 group"
+                  >
+                    <Library size={20} />
+                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                      LSI
+                    </span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (isAuthenticated && !isGuest) {
+                        try {
+                          await api.getCarrera(carreraTUDW.id);
+                          setCarreraAConfirmar("TUDW");
+                        } catch {
+                          cargarTUDW();
+                        }
+                      } else {
+                        cargarTUDW();
+                      }
+                    }}
+                    className="text-white/60 hover:text-cyan-400 flex flex-col items-center gap-1 group"
+                  >
+                    <Library size={20} />
+                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                      TUDW
+                    </span>
+                  </button>
+
                   <button
                     onClick={async () => {
                       if (isAuthenticated && !isGuest) {
@@ -126,10 +183,10 @@ export default function Menu() {
                           await api.getCarrera(carreraTUASSL.id);
                           setCarreraAConfirmar("TUASSL");
                         } catch {
-                          cargarADYSL();
+                          cargarTUASSL();
                         }
                       } else {
-                        cargarADYSL();
+                        cargarTUASSL();
                       }
                     }}
                     className="text-white/60 hover:text-cyan-400 flex flex-col items-center gap-1 group"
@@ -198,18 +255,45 @@ export default function Menu() {
                   <div className="h-px w-full bg-white/10" />
                   {/* Lista de Recientes */}
                   {carrerasRecientes.map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => {
-                        cargarCarreraCustom(c.id);
-                      }}
-                      className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/50 text-blue-400 flex items-center justify-center text-xs font-bold hover:bg-blue-600/40 transition-all group relative"
-                    >
-                      {c.abreviacion}
-                      <span className="absolute right-12 bg-[#1a1a1a] border border-white/10 px-2 py-1 rounded text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <div key={c.id} className="relative group/circulo">
+                      <button
+                        onClick={() => cargarCarreraCustom(c.id)}
+                        className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/50 text-blue-400 flex items-center justify-center text-xs font-bold hover:bg-blue-600/40 transition-all relative overflow-hidden"
+                      >
+                        <span className="group-hover/circulo:translate-y-10 opacity-100 group-hover/circulo:opacity-0 transition-all duration-200">
+                          {c.abreviacion}
+                        </span>
+
+                        {/* Botones de edicion/borrado */}
+                        <div className="absolute inset-0 flex items-center justify-center gap-1 opacity-0 group-hover/circulo:opacity-100 transition-opacity bg-blue-600/10 backdrop-blur-sm">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCarreraEditando(c);
+                            }}
+                            className="p-1 hover:text-white transition-colors"
+                            title="Editar carrera"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCarreraAEliminar(c);
+                            }}
+                            className="p-1 hover:text-red-400 transition-colors"
+                            title="Borrar carrera"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </button>
+
+                      {/* Tooltip nombre */}
+                      <span className="absolute right-14 top-1/2 -translate-y-1/2 bg-[#1a1a1a] border border-white/10 px-2 py-1 rounded text-[10px] whitespace-nowrap opacity-0 group-hover/circulo:opacity-100 transition-opacity pointer-events-none z-[110]">
                         {c.nombre}
                       </span>
-                    </button>
+                    </div>
                   ))}
                   {carrerasCustom.length > 3 && (
                     <button
@@ -263,14 +347,29 @@ export default function Menu() {
           textoBoton="Reemplazar"
           colorBoton="bg-red-600 hover:bg-red-500"
           onConfirm={() => {
-            if (carreraAConfirmar === "LCC") {
-              api.deleteProgresoCarrera(carreraLCC.id).catch(() => {});
-              api.deletePosiciones(carreraLCC.id).catch(() => {});
-              cargarLCC();
-            } else {
-              api.deleteProgresoCarrera(carreraTUASSL.id).catch(() => {});
-              api.deletePosiciones(carreraTUASSL.id).catch(() => {});
-              cargarADYSL();
+            switch (carreraAConfirmar) {
+              case "LCC":
+                api.deleteProgresoCarrera(carreraLCC.id).catch(() => {});
+                api.deletePosiciones(carreraLCC.id).catch(() => {});
+                cargarLCC();
+                break;
+              case "LSI":
+                api.deleteProgresoCarrera(carreraLSI.id).catch(() => {});
+                api.deletePosiciones(carreraLSI.id).catch(() => {});
+                cargarLSI();
+                break;
+              case "TUASSL":
+                api.deleteProgresoCarrera(carreraTUASSL.id).catch(() => {});
+                api.deletePosiciones(carreraTUASSL.id).catch(() => {});
+                cargarTUASSL();
+                break;
+              case "TUDW":
+                api.deleteProgresoCarrera(carreraTUDW.id).catch(() => {});
+                api.deletePosiciones(carreraTUDW.id).catch(() => {});
+                cargarTUDW();
+                break;
+              default:
+                break;
             }
             setCarreraAConfirmar(null);
           }}
@@ -309,7 +408,36 @@ export default function Menu() {
         onClose={() => setIsModalCarrerasOpen(false)}
         carreras={carrerasCustom}
         onSeleccionar={(id) => cargarCarreraCustom(id)}
+        onEditar={(c) => setCarreraEditando(c)}
+        onBorrar={(c) => setCarreraAEliminar(c)}
       />
+      <ModalEditarCarrera
+        carrera={carreraEditando}
+        onClose={() => setCarreraEditando(null)}
+        onSave={async (id, datos) => {
+          try {
+            await actualizarCarrera(id, datos);
+            return null;
+          } catch (err: any) {
+            return err.message;
+          }
+        }}
+      />
+
+      {carreraAEliminar && (
+        <ModalConfirmar
+          titulo="¿Borrar carrera?"
+          mensaje={`¿Estás seguro que querés borrar "${carreraAEliminar.nombre}"? Esta acción no se puede deshacer.`}
+          textoBoton="Borrar"
+          colorBoton="bg-red-600 hover:bg-red-500"
+          onConfirm={() => {
+            borrarCarrera(carreraAEliminar.id);
+            setCarreraAEliminar(null);
+          }}
+          onClose={() => setCarreraAEliminar(null)}
+          zIndex="z-[300]"
+        />
+      )}
     </>
   );
 }

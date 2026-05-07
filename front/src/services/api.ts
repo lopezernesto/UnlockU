@@ -141,12 +141,12 @@ export const api = {
 
   updateCarrera: async (
     id: string,
-    data: {
+    data: Partial<{
       nombre: string;
       abreviacion: string;
       aniosDuracion: number;
       materias: any[];
-    },
+    }>,
   ) => {
     const res = await fetch(`${API_URL}/api/carreras/${id}`, {
       method: "PUT",
@@ -154,7 +154,10 @@ export const api = {
       credentials: "include",
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error("Error al actualizar carrera");
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Error al actualizar carrera");
+    }
     return res.json();
   },
 

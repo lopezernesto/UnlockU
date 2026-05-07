@@ -38,13 +38,13 @@ export function useCarrerasCustom(isAuthenticated: boolean, isGuest: boolean) {
 
   // Actualizar carrera
   const actualizarMutation = useMutation({
-    mutationFn: ({ id, carrera }: { id: string; carrera: CarreraData }) =>
-      api.updateCarrera(id, {
-        nombre: carrera.nombre,
-        abreviacion: carrera.abreviacion,
-        aniosDuracion: carrera.aniosDuracion,
-        materias: carrera.materias,
-      }),
+    mutationFn: ({
+      id,
+      carrera,
+    }: {
+      id: string;
+      carrera: { nombre: string; abreviacion: string };
+    }) => api.updateCarrera(id, carrera),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
     },
@@ -62,8 +62,10 @@ export function useCarrerasCustom(isAuthenticated: boolean, isGuest: boolean) {
     carreras,
     isLoading,
     crearCarrera: (carrera: CarreraData) => crearMutation.mutateAsync(carrera),
-    actualizarCarrera: (id: string, carrera: CarreraData) =>
-      actualizarMutation.mutateAsync({ id, carrera }),
+    actualizarCarrera: (
+      id: string,
+      datos: { nombre: string; abreviacion: string },
+    ) => actualizarMutation.mutateAsync({ id, carrera: datos }),
     borrarCarrera: (id: string) => borrarMutation.mutateAsync(id),
   };
 }
