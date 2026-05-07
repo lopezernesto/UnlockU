@@ -30,11 +30,14 @@ export default function ModalEditarMateria({
   const [errorNombre, setErrorNombre] = useState<string | null>(null);
 
   //Con esta funcion encuentro las correlativas y se muestran al abrir el modal la primera vez
-  const encontrarMaterias = (ids: string[]) => {
-    return ids
-      .map((id) => todasLasMaterias.find((m) => m.id === id))
-      .filter((m): m is MateriaData => !!m);
-  };
+  const encontrarMaterias = useMemo(() => {
+    return (ids: string[]) => {
+      return ids
+        .map((id) => todasLasMaterias.find((m) => m.id === id))
+        .filter((m): m is MateriaData => !!m);
+    };
+  }, [todasLasMaterias]);
+
   const [correlativasC, setCorrelativasC] = useState<MateriaData[]>(() =>
     materia ? encontrarMaterias(materia.correlativasCursada) : [],
   );

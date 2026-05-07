@@ -8,7 +8,7 @@ interface PanelUsuarioProps {
 
 export default function PanelUsuario({ user, onLogout }: PanelUsuarioProps) {
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
-
+  const [fotoError, setFotoError] = useState(false);
   const inicial = user?.nombre?.charAt(0).toUpperCase() || "U";
   const foto = user?.foto;
 
@@ -18,11 +18,12 @@ export default function PanelUsuario({ user, onLogout }: PanelUsuarioProps) {
         onClick={() => setMostrarDropdown(!mostrarDropdown)}
         className="w-12 h-12 rounded-full bg-[#1a1a1a] border border-white/20 flex items-center justify-center text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all hover:scale-105 hover:border-white/40 overflow-hidden"
       >
-        {foto ? (
+        {foto && !fotoError ? (
           <img
             src={foto}
             alt={user?.nombre}
             className="w-full h-full object-cover"
+            onError={() => setFotoError(true)}
           />
         ) : (
           <span className="text-white/80">{inicial}</span>
