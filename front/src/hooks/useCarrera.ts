@@ -3,7 +3,6 @@ import { carreraLCC } from "../data/LCC";
 import { carreraLSI } from "../data/LSI";
 import { carreraTUASSL } from "../data/TUASSL";
 import { carreraTUDW } from "../data/TUDW";
-
 import type { CarreraData } from "../types/Carrera";
 import type { EstadoMateria, MateriaData } from "../types/Materia";
 import { api } from "../services/api";
@@ -14,9 +13,16 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
   const queryClient = useQueryClient();
   const debeUsarBackend = isAuthenticated && !isGuest;
   const [carreraActual, setCarreraActual] = useState<CarreraData | null>(() => {
-    const guardado = localStorage.getItem("carrera-data");
-    return guardado ? JSON.parse(guardado) : null;
+    if (isGuest) {
+      const guardado = localStorage.getItem("carrera-data");
+      return guardado ? JSON.parse(guardado) : null;
+    } else {
+      return null;
+    }
   });
+  const [posicionesIniciales, setPosicionesIniciales] = useState<
+    Record<string, { x: number; y: number }>
+  >({});
   const materias = useMemo(() => {
     return carreraActual?.materias ?? [];
   }, [carreraActual]);
@@ -33,6 +39,7 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
   }, [carreraActual, debeUsarBackend]);
 
   const limpiarLocalStorage = useCallback(() => {
+    setPosicionesIniciales({});
     localStorage.removeItem("nodos-posiciones");
     localStorage.removeItem("react-flow-viewport");
     setResetKey((prev) => prev + 1);
@@ -109,7 +116,7 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
         return actualizada;
       });
     },
-    [debeUsarBackend],
+    [debeUsarBackend, queryClient],
   );
 
   function aplicarProgreso(carrera: CarreraData, progreso: any[]): CarreraData {
@@ -141,17 +148,12 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
           api.getPosiciones(id),
         ]);
         const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        setTimeout(() => {
-          const posicionesMap: Record<string, { x: number; y: number }> = {};
-          posiciones.forEach((p: any) => {
-            posicionesMap[p.materiaId] = { x: p.x, y: p.y };
-          });
-          localStorage.setItem(
-            "nodos-posiciones",
-            JSON.stringify(posicionesMap),
-          );
-          setCarreraActual(carreraConProgreso);
-        }, 0);
+        const posicionesMap: Record<string, { x: number; y: number }> = {};
+        posiciones.forEach((p: any) => {
+          posicionesMap[p.materiaId] = { x: p.x, y: p.y };
+        });
+        setPosicionesIniciales(posicionesMap);
+        setCarreraActual(carreraConProgreso);
       }
     },
     [limpiarLocalStorage, debeUsarBackend],
@@ -167,17 +169,12 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
           api.getPosiciones(carreraLCC.id),
         ]);
         const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        setTimeout(() => {
-          const posicionesMap: Record<string, { x: number; y: number }> = {};
-          posiciones.forEach((p: any) => {
-            posicionesMap[p.materiaId] = { x: p.x, y: p.y };
-          });
-          localStorage.setItem(
-            "nodos-posiciones",
-            JSON.stringify(posicionesMap),
-          );
-          setCarreraActual(carreraConProgreso);
-        }, 0);
+        const posicionesMap: Record<string, { x: number; y: number }> = {};
+        posiciones.forEach((p: any) => {
+          posicionesMap[p.materiaId] = { x: p.x, y: p.y };
+        });
+        setPosicionesIniciales(posicionesMap);
+        setCarreraActual(carreraConProgreso);
       } catch {
         // Primera vez: guardar la estructura en el back y cargar sin progreso
         await api.saveCarrera({
@@ -188,12 +185,12 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
           materias: carreraLCC.materias,
         });
         queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
-        setTimeout(() => setCarreraActual(carreraLCC), 0);
+        setCarreraActual(carreraLCC);
       }
     } else {
-      setTimeout(() => setCarreraActual(carreraLCC), 0);
+      setCarreraActual(carreraLCC);
     }
-  }, [limpiarLocalStorage, debeUsarBackend]);
+  }, [limpiarLocalStorage, debeUsarBackend, queryClient]);
 
   const cargarCarreraLSI = useCallback(async () => {
     limpiarLocalStorage();
@@ -205,17 +202,12 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
           api.getPosiciones(carreraLSI.id),
         ]);
         const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        setTimeout(() => {
-          const posicionesMap: Record<string, { x: number; y: number }> = {};
-          posiciones.forEach((p: any) => {
-            posicionesMap[p.materiaId] = { x: p.x, y: p.y };
-          });
-          localStorage.setItem(
-            "nodos-posiciones",
-            JSON.stringify(posicionesMap),
-          );
-          setCarreraActual(carreraConProgreso);
-        }, 0);
+        const posicionesMap: Record<string, { x: number; y: number }> = {};
+        posiciones.forEach((p: any) => {
+          posicionesMap[p.materiaId] = { x: p.x, y: p.y };
+        });
+        setPosicionesIniciales(posicionesMap);
+        setCarreraActual(carreraConProgreso);
       } catch {
         // Primera vez: guardar la estructura en el back y cargar sin progreso
         await api.saveCarrera({
@@ -226,12 +218,12 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
           materias: carreraLSI.materias,
         });
         queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
-        setTimeout(() => setCarreraActual(carreraLSI), 0);
+        setCarreraActual(carreraLSI);
       }
     } else {
-      setTimeout(() => setCarreraActual(carreraLSI), 0);
+      setCarreraActual(carreraLSI);
     }
-  }, [limpiarLocalStorage, debeUsarBackend]);
+  }, [limpiarLocalStorage, debeUsarBackend, queryClient]);
 
   const cargarTecnicaturaTUASSL = useCallback(async () => {
     limpiarLocalStorage();
@@ -243,17 +235,12 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
           api.getPosiciones(carreraTUASSL.id),
         ]);
         const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        setTimeout(() => {
-          const posicionesMap: Record<string, { x: number; y: number }> = {};
-          posiciones.forEach((p: any) => {
-            posicionesMap[p.materiaId] = { x: p.x, y: p.y };
-          });
-          localStorage.setItem(
-            "nodos-posiciones",
-            JSON.stringify(posicionesMap),
-          );
-          setCarreraActual(carreraConProgreso);
-        }, 0);
+        const posicionesMap: Record<string, { x: number; y: number }> = {};
+        posiciones.forEach((p: any) => {
+          posicionesMap[p.materiaId] = { x: p.x, y: p.y };
+        });
+        setPosicionesIniciales(posicionesMap);
+        setCarreraActual(carreraConProgreso);
       } catch {
         // Primera vez: guardar la estructura en el back y cargar sin progreso
         await api.deleteProgresoCarrera(carreraTUASSL.id).catch(() => {});
@@ -265,14 +252,12 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
           materias: carreraTUASSL.materias,
         });
         queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
-        setTimeout(() => setCarreraActual(carreraTUASSL), 0);
+        setCarreraActual(carreraTUASSL);
       }
     } else {
-      setTimeout(() => {
-        setCarreraActual(carreraTUASSL);
-      }, 0);
+      setCarreraActual(carreraTUASSL);
     }
-  }, [limpiarLocalStorage, debeUsarBackend]);
+  }, [limpiarLocalStorage, debeUsarBackend, queryClient]);
 
   const cargarTecnicaturaTUDW = useCallback(async () => {
     limpiarLocalStorage();
@@ -284,17 +269,12 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
           api.getPosiciones(carreraTUDW.id),
         ]);
         const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        setTimeout(() => {
-          const posicionesMap: Record<string, { x: number; y: number }> = {};
-          posiciones.forEach((p: any) => {
-            posicionesMap[p.materiaId] = { x: p.x, y: p.y };
-          });
-          localStorage.setItem(
-            "nodos-posiciones",
-            JSON.stringify(posicionesMap),
-          );
-          setCarreraActual(carreraConProgreso);
-        }, 0);
+        const posicionesMap: Record<string, { x: number; y: number }> = {};
+        posiciones.forEach((p: any) => {
+          posicionesMap[p.materiaId] = { x: p.x, y: p.y };
+        });
+        setPosicionesIniciales(posicionesMap);
+        setCarreraActual(carreraConProgreso);
       } catch {
         // Primera vez: guardar la estructura en el back y cargar sin progreso
         await api.deleteProgresoCarrera(carreraTUDW.id).catch(() => {});
@@ -306,14 +286,12 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
           materias: carreraTUDW.materias,
         });
         queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
-        setTimeout(() => setCarreraActual(carreraTUDW), 0);
+        setCarreraActual(carreraTUDW);
       }
     } else {
-      setTimeout(() => {
-        setCarreraActual(carreraTUDW);
-      }, 0);
+      setCarreraActual(carreraTUDW);
     }
-  }, [limpiarLocalStorage, debeUsarBackend]);
+  }, [limpiarLocalStorage, debeUsarBackend, queryClient]);
 
   const importarProgreso = useCallback(
     (file: File) => {
@@ -341,7 +319,7 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     },
     [limpiarLocalStorage, debeUsarBackend],
   );
-
+  //Modificar esta mierda para que ande, ahora que se cambiaron las cosas
   const exportarProgreso = () => {
     if (!carreraActual) return;
 
@@ -359,9 +337,7 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
   const cambiarCarrera = useCallback(() => {
     localStorage.removeItem("carrera-data");
     limpiarLocalStorage();
-    setTimeout(() => {
-      setCarreraActual(null);
-    }, 0);
+    setCarreraActual(null);
   }, [limpiarLocalStorage]);
 
   const crearNuevaCarrera = (
@@ -395,5 +371,6 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     crearNuevaCarrera,
     cargarCarreraCustom,
     resetearPosiciones,
+    posicionesIniciales,
   };
 }

@@ -26,10 +26,10 @@ model ProgresoMateria {
   carreraId String
   materiaId String
   estado    EstadoMateria
-  nota      Float?
-  fecha     String?
+  nota      Int?
+  fecha     Int?
 
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
   @@unique([usuarioId, carreraId, materiaId])
 }
@@ -42,7 +42,7 @@ model PosicionNodo {
   x         Float
   y         Float
 
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
   @@unique([usuarioId, carreraId, materiaId])
 }

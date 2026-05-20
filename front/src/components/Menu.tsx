@@ -117,10 +117,12 @@ export default function Menu() {
                   <button
                     onClick={async () => {
                       if (isAuthenticated && !isGuest) {
-                        try {
-                          await api.getCarrera(carreraLCC.id);
+                        const yaExiste = carrerasCustom.some(
+                          (c) => c.id === carreraLCC.id,
+                        );
+                        if (yaExiste) {
                           setCarreraAConfirmar("LCC");
-                        } catch {
+                        } else {
                           cargarLCC();
                         }
                       } else {
@@ -138,10 +140,12 @@ export default function Menu() {
                   <button
                     onClick={async () => {
                       if (isAuthenticated && !isGuest) {
-                        try {
-                          await api.getCarrera(carreraLSI.id);
+                        const yaExiste = carrerasCustom.some(
+                          (c) => c.id === carreraLSI.id,
+                        );
+                        if (yaExiste) {
                           setCarreraAConfirmar("LSI");
-                        } catch {
+                        } else {
                           cargarLSI();
                         }
                       } else {
@@ -158,10 +162,12 @@ export default function Menu() {
                   <button
                     onClick={async () => {
                       if (isAuthenticated && !isGuest) {
-                        try {
-                          await api.getCarrera(carreraTUDW.id);
+                        const yaExiste = carrerasCustom.some(
+                          (c) => c.id === carreraTUDW.id,
+                        );
+                        if (yaExiste) {
                           setCarreraAConfirmar("TUDW");
-                        } catch {
+                        } else {
                           cargarTUDW();
                         }
                       } else {
@@ -179,10 +185,12 @@ export default function Menu() {
                   <button
                     onClick={async () => {
                       if (isAuthenticated && !isGuest) {
-                        try {
-                          await api.getCarrera(carreraTUASSL.id);
+                        const yaExiste = carrerasCustom.some(
+                          (c) => c.id === carreraTUASSL.id,
+                        );
+                        if (yaExiste) {
                           setCarreraAConfirmar("TUASSL");
-                        } catch {
+                        } else {
                           cargarTUASSL();
                         }
                       } else {
@@ -256,7 +264,7 @@ export default function Menu() {
                   {/* Lista de Recientes */}
                   {carrerasRecientes.map((c) => (
                     <div key={c.id} className="relative group/circulo">
-                      <button
+                      <div
                         onClick={() => cargarCarreraCustom(c.id)}
                         className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/50 text-blue-400 flex items-center justify-center text-xs font-bold hover:bg-blue-600/40 transition-all relative overflow-hidden"
                       >
@@ -287,7 +295,7 @@ export default function Menu() {
                             <Trash2 size={12} />
                           </button>
                         </div>
-                      </button>
+                      </div>
 
                       {/* Tooltip nombre */}
                       <span className="absolute right-14 top-1/2 -translate-y-1/2 bg-[#1a1a1a] border border-white/10 px-2 py-1 rounded text-[10px] whitespace-nowrap opacity-0 group-hover/circulo:opacity-100 transition-opacity pointer-events-none z-[110]">

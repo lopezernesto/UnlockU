@@ -85,7 +85,25 @@ router.put("/:id", requireAuth, async (req, res) => {
     const usuarioId = (req.user as any).id;
     const { id } = req.params;
     const { nombre, abreviacion, aniosDuracion, materias } = req.body;
+    const existente = await prisma.carreraCustom.findFirst({
+      where: {
+        usuarioId,
+        id: { not: id as string },
+        OR: [
+          { nombre: { equals: nombre, mode: "insensitive" } },
+          { abreviacion: { equals: abreviacion, mode: "insensitive" } },
+        ],
+      },
+    });
 
+    if (existente) {
+      return res.status(409).json({
+        error:
+          existente.nombre === nombre
+            ? "Ya tenés una carrera con ese nombre"
+            : "Ya tenés una carrera con esa abreviación",
+      });
+    }
     if (typeof id !== "string") {
       return res.status(400).json({ error: "ID inválido" });
     }

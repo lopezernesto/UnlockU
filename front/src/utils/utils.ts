@@ -23,7 +23,13 @@ export function recalcularEstados(lista: MateriaData[]): MateriaData[] {
         estado: m.estado === "BLOQUEADA" ? "HABILITADA" : m.estado,
       };
     } else {
-      return { ...m, estado: "BLOQUEADA" as EstadoMateria };
+      return {
+        ...m,
+        estado: "BLOQUEADA" as EstadoMateria,
+        anioCursada: undefined,
+        anioFinal: undefined,
+        nota: undefined,
+      };
     }
   });
 }

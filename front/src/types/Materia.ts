@@ -7,8 +7,8 @@ export interface MateriaData {
   cuatrimestre: 1 | 2;
   estado: EstadoMateria;
   nota?: number;
-  anioCursada?: string;
-  anioFinal?: string;
+  anioCursada?: number;
+  anioFinal?: number;
   correlativasCursada: string[];
   correlativasFinal: string[];
 }

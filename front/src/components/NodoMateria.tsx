@@ -16,8 +16,8 @@ export type TipoModal =
 interface MateriaNodeProps {
   data: MateriaData & {
     aniosDuracion: number;
-    regularizar: (id: string, anio: string) => void;
-    aprobar: (id: string, anio: string, nota: number) => void;
+    regularizar: (id: string, anio: number) => void;
+    aprobar: (id: string, anio: number, nota: number) => void;
     resetear: (id: string) => void;
     borrar: (id: string) => void;
     editar: (id: string, nuevosDatos: Partial<MateriaData>) => void;

@@ -12,6 +12,7 @@ interface CarreraContextType {
   aniosDuracion: number;
   resetKey: number;
   isGuest: boolean;
+  posicionesIniciales: Record<string, { x: number; y: number }>;
   isAuthenticated: boolean;
 
   // Funciones de Carrera
@@ -82,6 +83,7 @@ export function CarreraProvider({ children }: { children: React.ReactNode }) {
     actualizarMaterias: carrera.actualizarMaterias,
     isAuthenticated,
     isGuest,
+    posicionesIniciales: carrera.posicionesIniciales,
   };
 
   return (

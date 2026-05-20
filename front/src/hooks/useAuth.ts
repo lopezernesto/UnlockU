@@ -27,6 +27,9 @@ export function useAuth() {
   });
   const enableGuestMode = () => {
     localStorage.setItem("guest-mode", "true");
+    localStorage.removeItem("carrera-data");
+    localStorage.removeItem("nodos-posiciones");
+    localStorage.removeItem("react-flow-viewport");
     setIsGuest(true);
   };
   return {

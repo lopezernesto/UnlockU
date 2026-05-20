@@ -64,6 +64,7 @@ export default function PanelUsuario({ user, onLogout }: PanelUsuarioProps) {
                 className="w-full px-4 py-2 text-left text-white/60 hover:text-red-400 hover:bg-white/5 transition-colors flex items-center gap-3 text-sm"
                 onClick={() => {
                   setMostrarDropdown(false);
+                  //Falta ponerle el cartel de que si es guest pierde todo jaja salu2
                   onLogout();
                 }}
               >

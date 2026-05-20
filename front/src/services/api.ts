@@ -35,7 +35,7 @@ export const api = {
     materiaId: string;
     estado: "CURSADA" | "APROBADA";
     nota?: number;
-    fecha?: string;
+    fecha?: number;
   }) => {
     const res = await fetch(`${API_URL}/api/progreso`, {
       method: "POST",

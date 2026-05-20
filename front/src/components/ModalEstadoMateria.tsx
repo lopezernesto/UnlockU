@@ -3,7 +3,7 @@ import { useState } from "react";
 interface AccionProps {
   tipo: "REGULARIZAR" | "APROBAR";
   nombreMateria: string;
-  onConfirm: (datos: { anio: string; nota?: number }) => void;
+  onConfirm: (datos: { anio: number; nota?: number }) => void;
   onClose: () => void;
 }
 
@@ -13,7 +13,7 @@ export function ModalAccionEstado({
   onConfirm,
   onClose,
 }: AccionProps) {
-  const [anio, setAnio] = useState(new Date().getFullYear().toString());
+  const [anio, setAnio] = useState(new Date().getFullYear());
   const [nota, setNota] = useState(7);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +34,7 @@ export function ModalAccionEstado({
                 type="number"
                 className={`${error ? "border-red-500" : "border-white/10"} nodrag nopan w-full bg-white/5 border rounded-lg p-3 text-white outline-none focus:border-blue-500 transition-colors`}
                 value={anio}
-                onChange={(e) => setAnio(e.target.value)}
+                onChange={(e) => setAnio(parseInt(e.target.value, 10) || 0)}
               />
               {error && (
                 <p className="text-red-400 text-[11px] mt-1">{error}</p>
@@ -65,10 +65,7 @@ export function ModalAccionEstado({
             </button>
             <button
               onClick={() => {
-                if (
-                  Number(anio) > 1900 &&
-                  Number(anio) <= new Date().getFullYear()
-                ) {
+                if (anio > 1900 && anio <= new Date().getFullYear()) {
                   onConfirm({
                     anio,
                     nota: tipo === "APROBAR" ? nota : undefined,

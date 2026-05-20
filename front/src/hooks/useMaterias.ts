@@ -17,6 +17,7 @@ interface useMateriasProps {
   aniosDuracion: number;
   actualizarMaterias: (nuevasMaterias: MateriaData[]) => void;
   resetKey: number;
+  posicionesIniciales: Record<string, { x: number; y: number }>;
 }
 
 export default function useMaterias({
@@ -24,6 +25,7 @@ export default function useMaterias({
   aniosDuracion,
   actualizarMaterias,
   resetKey,
+  posicionesIniciales,
 }: useMateriasProps) {
   //localStorage.clear(); //para hacer pruebas borrando todo
   //Este useMemo se utiliza para que se ReactFlow no re-renderice los nodos innecesariamente cuando hay algun cambio en el estado
@@ -142,7 +144,7 @@ export default function useMaterias({
   );
   // Funciones para modificar el estado de las materias
   const regularizarMateria = useCallback(
-    (id: string, anio: string) => {
+    (id: string, anio: number) => {
       setMaterias((prev) => {
         const nuevas = prev.map((m) =>
           m.id === id
@@ -156,7 +158,7 @@ export default function useMaterias({
   );
 
   const aprobarFinal = useCallback(
-    (id: string, anio: string, nota: number) => {
+    (id: string, anio: number, nota: number) => {
       setMaterias((prev) => {
         const nuevas = prev.map((m) =>
           m.id === id
@@ -312,9 +314,6 @@ export default function useMaterias({
       return;
     }
     const estructura = generarEstructuraDinamica(materias);
-    const posicionesGuardadas = JSON.parse(
-      localStorage.getItem("nodos-posiciones") || "{}",
-    );
 
     const nodosMaterias = materias.map((m) => ({
       id: m.id,
@@ -322,7 +321,7 @@ export default function useMaterias({
       parentId: `year-group-${m.anio}`,
       extent: "parent" as const,
       position:
-        posicionesGuardadas[m.id] || calcularPosicionRelativa(m, materias),
+        posicionesIniciales[m.id] || calcularPosicionRelativa(m, materias),
       data: {
         ...m,
         aniosDuracion: aniosDuracion,
@@ -348,6 +347,7 @@ export default function useMaterias({
     resetearMateria,
     borrarMateria,
     editarMateria,
+    posicionesIniciales,
   ]);
 
   return {

@@ -25,6 +25,9 @@ UnlockU es una aplicación web interactiva que te permite visualizar y gestionar
 Actualmente incluye el plan de estudios completo de:
 
 - **Licenciatura en Ciencias de la Computación** (Plan 1112/2013) - UNCo, Neuquén
+- **Licenciatura en Sistemas de Información** (Plan 1420/2013) - UNCo, Neuquén
+- **Tecnicatura Universitaria en Dessarrollo WEB** - UNCo, Neuquén
+- **Tecnicatura Universitaria en Administración de Sistemas y Software Libre** - UNCo, Neuquén
 
 _Se planean agregar más carreras en futuras versiones_
 
@@ -32,10 +35,14 @@ _Se planean agregar más carreras en futuras versiones_
 
 ## 🚀 Demo
 
+### Login
+
+![Login](./front/screenshots/Login.png)
+
 ### Vista General
 
-![Vista completa del plan](./front/screenshots/Bienvenida.png)
-![Vista completa del plan](./screenshots/VistaGeneral.png)
+![Bienvenida](./front/screenshots/Bienvenida.png)
+![Vista completa del plan LCC](./front/screenshots/VistaGeneral.png)
 
 ### Estados y Progreso
 
@@ -46,6 +53,11 @@ _Se planean agregar más carreras en futuras versiones_
 
 ![Modal de edición](./front/screenshots/ModalEditar.png)
 ![Sidebar de agregar materia](./front/screenshots/AgregarMateria.png)
+
+### Gestión de Carreras
+
+![Modal de creación](./front/screenshots/CrearCarrera.png)
+![Modal de edición](./front/screenshots/EditarCarrera.png)
 
 ---
 
@@ -156,6 +168,7 @@ UnlockU/
 │   │   │   ├── NodoMateria.tsx  # Carta de materia individual
 │   │   │   ├── SidebarMateria.tsx    # Panel para agregar materias
 │   │   │   ├── ModalEditarMateria.tsx
+│   │   │   ├── ModalEditarCarrera.tsx
 │   │   │   ├── ModalEstadoMateria.tsx
 │   │   │   ├── ModalConfirmacion.tsx
 │   │   │   ├── ModalCrearCarrera.tsx
@@ -176,7 +189,9 @@ UnlockU/
 │   │   │   └── utils.ts #Funciones compartidas
 │   │   ├── data/
 │   │   │   ├── LCC.ts           # Plan de LCC completo
+│   │   │   ├── LSI.ts           # Plan de LCC completo
 │   │   │   ├── TUASSL.ts       # Plan de TUASSL completo
+│   │   │   ├── TUDW.ts       # Plan de TUDW completo
 │   │   │   └── MateriasIniciales.ts  # Datos de prueba
 │   │   ├── App.tsx              # Componente principal
 │   │   ├── main.tsx             # Entry point

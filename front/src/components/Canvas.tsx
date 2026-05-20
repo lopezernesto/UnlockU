@@ -21,6 +21,7 @@ export default function Canvas() {
     carreraActual,
     isAuthenticated,
     isGuest,
+    posicionesIniciales,
   } = useCarreraContext();
 
   const { nodos, arcos, nodeTypes, onNodesChange, onEdgesChange } = useMaterias(
@@ -29,6 +30,7 @@ export default function Canvas() {
       aniosDuracion,
       actualizarMaterias,
       resetKey,
+      posicionesIniciales,
     },
   );
 
