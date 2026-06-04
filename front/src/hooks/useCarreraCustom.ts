@@ -16,7 +16,7 @@ export function useCarrerasCustom(isAuthenticated: boolean, isGuest: boolean) {
         nombre: c.nombre,
         abreviacion: c.abreviacion,
         aniosDuracion: c.aniosDuracion,
-        updatedAt: c.updatedAt,
+        actualizadoEn: c.actualizadoEn,
       })) as CarreraResumen[];
     },
     enabled: isAuthenticated && !isGuest,
@@ -61,7 +61,8 @@ export function useCarrerasCustom(isAuthenticated: boolean, isGuest: boolean) {
   return {
     carreras,
     isLoading,
-    crearCarrera: (carrera: CarreraData) => crearMutation.mutateAsync(carrera),
+    crearCarrera: (carrera: Omit<CarreraData, "id">) =>
+      crearMutation.mutateAsync(carrera as CarreraData),
     actualizarCarrera: (
       id: string,
       datos: { nombre: string; abreviacion: string },

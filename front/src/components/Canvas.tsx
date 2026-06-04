@@ -1,9 +1,11 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
   ReactFlow,
   Background,
   Controls,
   ControlButton,
+  type Node,
+  type NodeMouseHandler,
   type Viewport,
 } from "@xyflow/react";
 import { LayoutGrid } from "lucide-react";
@@ -34,17 +36,21 @@ export default function Canvas() {
     },
   );
 
-  const initialViewport: Viewport = JSON.parse(
-    localStorage.getItem("react-flow-viewport") ||
-      '{"x": 350, "y": 150, "zoom": 0.8}',
-  );
+  const initialViewport = useMemo<Viewport>(() => {
+    try {
+      const guardado = localStorage.getItem("react-flow-viewport");
+      return guardado ? JSON.parse(guardado) : { x: 350, y: 150, zoom: 0.8 };
+    } catch {
+      return { x: 350, y: 150, zoom: 0.8 };
+    }
+  }, []);
 
   const onMoveEnd = useCallback((_: any, viewport: Viewport) => {
     localStorage.setItem("react-flow-viewport", JSON.stringify(viewport));
   }, []);
 
-  const onNodeDragStop = useCallback(
-    (_: any, node: any) => {
+  const onNodeDragStop: NodeMouseHandler = useCallback(
+    (_: any, node: Node) => {
       const posiciones = JSON.parse(
         localStorage.getItem("nodos-posiciones") || "{}",
       );

@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
+
 @source "../index.html";
 @source "./**/*.{js,ts,jsx,tsx}";
 
-/* Tus animaciones para el giro de carta */
+
 .perspective-1000 { perspective: 1000px; }
 .transform-style-3d { transform-style: preserve-3d; }
 .backface-hidden { backface-visibility: hidden; }
 .rotate-y-180 { transform: rotateY(180deg); }
 
-/* Reset básico */
+
 html, body, #root {
   width: 100%;
   height: 100%;
@@ -25,17 +26,17 @@ html, body, #root {
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent; /* Fondo invisible */
+  background: transparent; 
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1); /* Color gris muy suave */
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   transition: background 0.3s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3); /* Se nota un poco más al pasar el mouse */
+  background: rgba(255, 255, 255, 0.3); 
 }
 
 /* Firefox */
@@ -45,7 +46,7 @@ html, body, #root {
 }
 /*Este sirve para el hover de los arcos */
 .react-flow__edge:hover .react-flow__edge-path {
-  stroke: #22d3ee !important; /* Cyan 400 */
+  stroke: #22d3ee !important; 
   stroke-width: 4px !important;
   filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.6));
 }

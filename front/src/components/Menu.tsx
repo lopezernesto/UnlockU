@@ -65,7 +65,7 @@ export default function Menu() {
 
   // Ordenar por más recientes y tomar las 3 últimas
   const carrerasRecientes = [...carrerasCustom]
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .sort((a, b) => b.actualizadoEn.localeCompare(a.actualizadoEn))
     .slice(0, 3);
 
   return (
@@ -393,7 +393,6 @@ export default function Menu() {
             try {
               // Usuario logueado: guardar en backend
               const carreraGuardada = await crearCarrera({
-                id: crypto.randomUUID(),
                 nombre: datos.nombre,
                 abreviacion: datos.abreviacion,
                 aniosDuracion: datos.anios,

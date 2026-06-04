@@ -10,7 +10,7 @@ const materiasIniciales: MateriaData[] = [
     cuatrimestre: 1,
     estado: "APROBADA",
     nota: 9,
-    anioFinal: "2024",
+    anioAprobado: "2024",
     correlativasCursada: [],
     correlativasFinal: [],
   },

@@ -165,7 +165,7 @@ export default function useMaterias({
             ? {
                 ...m,
                 estado: "APROBADA" as EstadoMateria,
-                anioFinal: anio,
+                anioAprobado: anio,
                 nota: nota,
               }
             : m,
@@ -185,7 +185,7 @@ export default function useMaterias({
                 ...m,
                 estado: "BLOQUEADA" as EstadoMateria,
                 anioCursada: undefined,
-                anioFinal: undefined,
+                anioAprobado: undefined,
                 nota: undefined,
               }
             : m,
@@ -315,15 +315,27 @@ export default function useMaterias({
     }
     const estructura = generarEstructuraDinamica(materias);
 
+    const posicionesGuardadas: Record<string, { x: number; y: number }> =
+      (() => {
+        try {
+          return JSON.parse(localStorage.getItem("nodos-posiciones") || "{}");
+        } catch {
+          return {};
+        }
+      })();
+
     const nodosMaterias = materias.map((m) => ({
       id: m.id,
       type: "materia",
       parentId: `year-group-${m.anio}`,
       extent: "parent" as const,
       position:
-        posicionesIniciales[m.id] || calcularPosicionRelativa(m, materias),
+        posicionesGuardadas[m.id] ||
+        posicionesIniciales[m.id] ||
+        calcularPosicionRelativa(m, materias),
       data: {
         ...m,
+        todasLasMaterias: materias,
         aniosDuracion: aniosDuracion,
         regularizar: regularizarMateria,
         aprobar: aprobarFinal,

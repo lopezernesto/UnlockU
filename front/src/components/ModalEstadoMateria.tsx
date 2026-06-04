@@ -65,14 +65,18 @@ export function ModalAccionEstado({
             </button>
             <button
               onClick={() => {
-                if (anio > 1900 && anio <= new Date().getFullYear()) {
-                  onConfirm({
-                    anio,
-                    nota: tipo === "APROBAR" ? nota : undefined,
-                  });
-                } else {
+                if (anio < 1900 || anio > new Date().getFullYear()) {
                   setError("Ingrese un año válido");
+                  return;
                 }
+                if (nota < 1 || nota > 10) {
+                  setError("Ingrese una nota entre 1 y 10");
+                  return;
+                }
+                onConfirm({
+                  anio,
+                  nota: tipo === "APROBAR" ? nota : undefined,
+                });
               }}
               className={`px-8 py-3 rounded-xl font-bold text-white transition-all active:scale-95 ${
                 tipo === "APROBAR"

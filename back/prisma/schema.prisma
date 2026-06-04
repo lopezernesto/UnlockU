@@ -27,7 +27,9 @@ model ProgresoMateria {
   materiaId String
   estado    EstadoMateria
   nota      Int?
-  fecha     Int?
+  anioCursada     Int?
+  anioAprobado Int?
+  actualizadoEn DateTime @updatedAt
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
@@ -54,7 +56,7 @@ model CarreraCustom {
   abreviacion   String
   aniosDuracion Int
   materias      Json
-  updatedAt DateTime @updatedAt
+  actualizadoEn DateTime @updatedAt
   creadoEn      DateTime @default(now())
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)

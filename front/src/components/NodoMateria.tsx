@@ -1,11 +1,10 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
 import type { MateriaData } from "../types/Materia";
 import { Award, CircleCheck, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import ModalEditarMateria from "./ModalEditarMateria";
 import { ModalConfirmar } from "./ModalConfirmacion";
 import { ModalAccionEstado } from "./ModalEstadoMateria";
-import { useCarreraContext } from "../context/CarreraContext";
 export type TipoModal =
   | "BORRAR"
   | "REINICIAR"
@@ -15,6 +14,7 @@ export type TipoModal =
 
 interface MateriaNodeProps {
   data: MateriaData & {
+    todasLasMaterias: MateriaData[];
     aniosDuracion: number;
     regularizar: (id: string, anio: number) => void;
     aprobar: (id: string, anio: number, nota: number) => void;
@@ -35,7 +35,6 @@ export const MateriaNode = memo(function MateriaNode({
   const [modalEstados, setModalEstados] = useState<TipoModal>(null);
   const [mostrarBarra, setMostrarBarra] = useState(true);
 
-  const { materias: todasLasMaterias } = useCarreraContext();
   // Calcular progreso de correlativas
   const calcularProgreso = () => {
     const totalCorrelativas =
@@ -44,7 +43,7 @@ export const MateriaNode = memo(function MateriaNode({
       return { completadas: 0, total: 0, porcentaje: 0 };
 
     const cursadasCompletadas = data.correlativasCursada.filter((idC) => {
-      const materia = todasLasMaterias.find((m) => m.id === idC);
+      const materia = data.todasLasMaterias.find((m) => m.id === idC);
       return (
         materia &&
         (materia.estado === "CURSADA" || materia.estado === "APROBADA")
@@ -52,7 +51,7 @@ export const MateriaNode = memo(function MateriaNode({
     }).length;
 
     const finalesCompletados = data.correlativasFinal.filter((idF) => {
-      const materia = todasLasMaterias.find((m) => m.id === idF);
+      const materia = data.todasLasMaterias.find((m) => m.id === idF);
       return materia && materia.estado === "APROBADA";
     }).length;
 
@@ -62,7 +61,10 @@ export const MateriaNode = memo(function MateriaNode({
     return { completadas, total: totalCorrelativas, porcentaje };
   };
 
-  const progreso = calcularProgreso();
+  const progreso = useMemo(
+    () => calcularProgreso(),
+    [data.correlativasCursada, data.correlativasFinal, data.todasLasMaterias],
+  );
 
   // Efecto para animar la barra al 100% antes de desaparecer
   useEffect(() => {
@@ -247,7 +249,7 @@ export const MateriaNode = memo(function MateriaNode({
                   </p>
                   <ul className="space-y-0.5 pl-1">
                     {data.correlativasCursada.map((idC) => {
-                      const materia = todasLasMaterias.find(
+                      const materia = data.todasLasMaterias.find(
                         (m) => m.id === idC,
                       );
                       const completada =
@@ -282,7 +284,7 @@ export const MateriaNode = memo(function MateriaNode({
                   </p>
                   <ul className="space-y-0.5 pl-1">
                     {data.correlativasFinal.map((idF) => {
-                      const materia = todasLasMaterias.find(
+                      const materia = data.todasLasMaterias.find(
                         (m) => m.id === idF,
                       );
                       const completada =
@@ -311,13 +313,13 @@ export const MateriaNode = memo(function MateriaNode({
           {data.estado !== "BLOQUEADA" && data.estado !== "HABILITADA" && (
             <div className="space-y-2 flex-1">
               <p>
-                <strong>Año cursada:</strong> {data.anioCursada || "--"}
+                <strong>Año cursada:</strong> {data.anioCursada ?? "--"}
               </p>
               <p>
-                <strong>Año final:</strong> {data.anioFinal || "--"}
+                <strong>Año final:</strong> {data.anioAprobado ?? "--"}
               </p>
               <p>
-                <strong>Nota:</strong> {data.nota || "--"}
+                <strong>Nota:</strong> {data.nota ?? "--"}
               </p>
             </div>
           )}

@@ -1,17 +1,24 @@
 import { LogOut, User } from "lucide-react";
 import { useState } from "react";
+import { type UsuarioAuth } from "../types/Auth";
+import { ModalConfirmar } from "./ModalConfirmacion";
 
 interface PanelUsuarioProps {
-  user: any;
+  user: UsuarioAuth | null | undefined;
+  isGuest: boolean;
   onLogout: () => void;
 }
 
-export default function PanelUsuario({ user, onLogout }: PanelUsuarioProps) {
+export default function PanelUsuario({
+  user,
+  isGuest,
+  onLogout,
+}: PanelUsuarioProps) {
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
   const [fotoError, setFotoError] = useState(false);
   const inicial = user?.nombre?.charAt(0).toUpperCase() || "U";
   const foto = user?.foto;
-
+  const [isConfirmar, setIsConfirmar] = useState(false);
   return (
     <div className="fixed top-6 right-6 z-[100]">
       <button
@@ -64,8 +71,11 @@ export default function PanelUsuario({ user, onLogout }: PanelUsuarioProps) {
                 className="w-full px-4 py-2 text-left text-white/60 hover:text-red-400 hover:bg-white/5 transition-colors flex items-center gap-3 text-sm"
                 onClick={() => {
                   setMostrarDropdown(false);
-                  //Falta ponerle el cartel de que si es guest pierde todo jaja salu2
-                  onLogout();
+                  if (isGuest) {
+                    setIsConfirmar(true);
+                  } else {
+                    onLogout();
+                  }
                 }}
               >
                 <LogOut size={16} />
@@ -74,6 +84,20 @@ export default function PanelUsuario({ user, onLogout }: PanelUsuarioProps) {
             </div>
           </div>
         </>
+      )}
+      {isConfirmar && (
+        <ModalConfirmar
+          titulo="¿Seguro querés cerrar sesión?"
+          mensaje="Perderás los cambios actuales si no exportaste tu progreso. ¿Querés continuar?"
+          textoBoton="Cerrar sesión"
+          colorBoton="bg-red-600 hover:bg-red-500"
+          onConfirm={() => {
+            onLogout();
+            setIsConfirmar(false);
+          }}
+          onClose={() => setIsConfirmar(false)}
+          zIndex="z-[50]"
+        />
       )}
     </div>
   );

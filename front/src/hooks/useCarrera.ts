@@ -8,6 +8,34 @@ import type { EstadoMateria, MateriaData } from "../types/Materia";
 import { api } from "../services/api";
 import { recalcularEstados } from "../utils/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
+
+interface ProgresoBackend {
+  materiaId: string;
+  estado: "CURSADA" | "APROBADA";
+  nota: number | null;
+  anioCursada: number | null;
+  anioAprobado: number | null;
+}
+const MateriaItemSchema = z.object({
+  id: z.string(),
+  nombre: z.string(),
+  anio: z.number().int(),
+  cuatrimestre: z.union([z.literal(1), z.literal(2)]),
+  estado: z.enum(["BLOQUEADA", "HABILITADA", "CURSADA", "APROBADA"]),
+  nota: z.number().int().min(0).max(10).optional(),
+  anioCursada: z.number().int().min(1900).max(2100).optional(),
+  anioAprobado: z.number().int().min(1900).max(2100).optional(),
+  correlativasCursada: z.array(z.string()),
+  correlativasFinal: z.array(z.string()),
+});
+const CarreraSchema = z.object({
+  id: z.string().min(1),
+  nombre: z.string().min(1),
+  abreviacion: z.string().min(1),
+  aniosDuracion: z.number().int().positive(),
+  materias: z.array(MateriaItemSchema),
+});
 
 export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
   const queryClient = useQueryClient();
@@ -67,7 +95,7 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
               : m.estado) as EstadoMateria,
             nota: undefined,
             anioCursada: undefined,
-            anioFinal: undefined,
+            anioAprobado: undefined,
           }));
 
           api
@@ -95,10 +123,8 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
                   materiaId: nueva.id,
                   estado: nueva.estado,
                   nota: nueva.nota,
-                  fecha:
-                    nueva.estado === "APROBADA"
-                      ? nueva.anioFinal
-                      : nueva.anioCursada,
+                  anioCursada: nueva.anioCursada,
+                  anioAprobado: nueva.anioAprobado,
                 })
                 .then(() => {
                   queryClient.invalidateQueries({
@@ -119,7 +145,10 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     [debeUsarBackend, queryClient],
   );
 
-  function aplicarProgreso(carrera: CarreraData, progreso: any[]): CarreraData {
+  function aplicarProgreso(
+    carrera: CarreraData,
+    progreso: ProgresoBackend[],
+  ): CarreraData {
     const materiasConProgreso = carrera.materias.map((m) => {
       const p = progreso.find((p) => p.materiaId === m.id);
       if (!p) return m;
@@ -127,8 +156,8 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
         ...m,
         estado: p.estado,
         nota: p.nota ?? undefined,
-        anioCursada: p.estado === "CURSADA" ? p.fecha : undefined,
-        anioFinal: p.estado === "APROBADA" ? p.fecha : undefined,
+        anioCursada: p.anioCursada ?? undefined,
+        anioAprobado: p.anioAprobado ?? undefined,
       };
     });
 
@@ -159,146 +188,74 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     [limpiarLocalStorage, debeUsarBackend],
   );
 
-  const cargarCarreraLCC = useCallback(async () => {
-    limpiarLocalStorage();
-    if (debeUsarBackend) {
-      try {
-        const [carrera, progreso, posiciones] = await Promise.all([
-          api.getCarrera(carreraLCC.id),
-          api.getProgreso(carreraLCC.id),
-          api.getPosiciones(carreraLCC.id),
-        ]);
-        const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        const posicionesMap: Record<string, { x: number; y: number }> = {};
-        posiciones.forEach((p: any) => {
-          posicionesMap[p.materiaId] = { x: p.x, y: p.y };
-        });
-        setPosicionesIniciales(posicionesMap);
-        setCarreraActual(carreraConProgreso);
-      } catch {
-        // Primera vez: guardar la estructura en el back y cargar sin progreso
-        await api.saveCarrera({
-          id: carreraLCC.id,
-          nombre: carreraLCC.nombre,
-          abreviacion: carreraLCC.abreviacion,
-          aniosDuracion: carreraLCC.aniosDuracion,
-          materias: carreraLCC.materias,
-        });
-        queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
-        setCarreraActual(carreraLCC);
+  const cargarCarreraPredefinida = useCallback(
+    async (carreraBase: CarreraData) => {
+      limpiarLocalStorage();
+      if (debeUsarBackend) {
+        try {
+          const [carrera, progreso, posiciones] = await Promise.all([
+            api.getCarrera(carreraBase.id),
+            api.getProgreso(carreraBase.id),
+            api.getPosiciones(carreraBase.id),
+          ]);
+          const carreraConProgreso = aplicarProgreso(carrera, progreso);
+          const posicionesMap: Record<string, { x: number; y: number }> = {};
+          posiciones.forEach((p: any) => {
+            posicionesMap[p.materiaId] = { x: p.x, y: p.y };
+          });
+          setPosicionesIniciales(posicionesMap);
+          setCarreraActual(carreraConProgreso);
+        } catch {
+          // Primera vez: guardar la estructura en el back y cargar sin progreso
+          await api.deleteProgresoCarrera(carreraBase.id).catch(() => {});
+          await api.saveCarrera({
+            id: carreraBase.id,
+            nombre: carreraBase.nombre,
+            abreviacion: carreraBase.abreviacion,
+            aniosDuracion: carreraBase.aniosDuracion,
+            materias: carreraBase.materias,
+          });
+          queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
+          setCarreraActual(carreraBase);
+        }
+      } else {
+        setCarreraActual(carreraBase);
       }
-    } else {
-      setCarreraActual(carreraLCC);
-    }
-  }, [limpiarLocalStorage, debeUsarBackend, queryClient]);
+    },
+    [limpiarLocalStorage, debeUsarBackend, queryClient],
+  );
 
-  const cargarCarreraLSI = useCallback(async () => {
-    limpiarLocalStorage();
-    if (debeUsarBackend) {
-      try {
-        const [carrera, progreso, posiciones] = await Promise.all([
-          api.getCarrera(carreraLSI.id),
-          api.getProgreso(carreraLSI.id),
-          api.getPosiciones(carreraLSI.id),
-        ]);
-        const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        const posicionesMap: Record<string, { x: number; y: number }> = {};
-        posiciones.forEach((p: any) => {
-          posicionesMap[p.materiaId] = { x: p.x, y: p.y };
-        });
-        setPosicionesIniciales(posicionesMap);
-        setCarreraActual(carreraConProgreso);
-      } catch {
-        // Primera vez: guardar la estructura en el back y cargar sin progreso
-        await api.saveCarrera({
-          id: carreraLSI.id,
-          nombre: carreraLSI.nombre,
-          abreviacion: carreraLSI.abreviacion,
-          aniosDuracion: carreraLSI.aniosDuracion,
-          materias: carreraLSI.materias,
-        });
-        queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
-        setCarreraActual(carreraLSI);
-      }
-    } else {
-      setCarreraActual(carreraLSI);
-    }
-  }, [limpiarLocalStorage, debeUsarBackend, queryClient]);
+  const cargarCarreraLCC = useCallback(
+    () => cargarCarreraPredefinida(carreraLCC),
+    [cargarCarreraPredefinida],
+  );
+  const cargarCarreraLSI = useCallback(
+    () => cargarCarreraPredefinida(carreraLSI),
+    [cargarCarreraPredefinida],
+  );
 
-  const cargarTecnicaturaTUASSL = useCallback(async () => {
-    limpiarLocalStorage();
-    if (debeUsarBackend) {
-      try {
-        const [carrera, progreso, posiciones] = await Promise.all([
-          api.getCarrera(carreraTUASSL.id),
-          api.getProgreso(carreraTUASSL.id),
-          api.getPosiciones(carreraTUASSL.id),
-        ]);
-        const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        const posicionesMap: Record<string, { x: number; y: number }> = {};
-        posiciones.forEach((p: any) => {
-          posicionesMap[p.materiaId] = { x: p.x, y: p.y };
-        });
-        setPosicionesIniciales(posicionesMap);
-        setCarreraActual(carreraConProgreso);
-      } catch {
-        // Primera vez: guardar la estructura en el back y cargar sin progreso
-        await api.deleteProgresoCarrera(carreraTUASSL.id).catch(() => {});
-        await api.saveCarrera({
-          id: carreraTUASSL.id,
-          nombre: carreraTUASSL.nombre,
-          abreviacion: carreraTUASSL.abreviacion,
-          aniosDuracion: carreraTUASSL.aniosDuracion,
-          materias: carreraTUASSL.materias,
-        });
-        queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
-        setCarreraActual(carreraTUASSL);
-      }
-    } else {
-      setCarreraActual(carreraTUASSL);
-    }
-  }, [limpiarLocalStorage, debeUsarBackend, queryClient]);
-
-  const cargarTecnicaturaTUDW = useCallback(async () => {
-    limpiarLocalStorage();
-    if (debeUsarBackend) {
-      try {
-        const [carrera, progreso, posiciones] = await Promise.all([
-          api.getCarrera(carreraTUDW.id),
-          api.getProgreso(carreraTUDW.id),
-          api.getPosiciones(carreraTUDW.id),
-        ]);
-        const carreraConProgreso = aplicarProgreso(carrera, progreso);
-        const posicionesMap: Record<string, { x: number; y: number }> = {};
-        posiciones.forEach((p: any) => {
-          posicionesMap[p.materiaId] = { x: p.x, y: p.y };
-        });
-        setPosicionesIniciales(posicionesMap);
-        setCarreraActual(carreraConProgreso);
-      } catch {
-        // Primera vez: guardar la estructura en el back y cargar sin progreso
-        await api.deleteProgresoCarrera(carreraTUDW.id).catch(() => {});
-        await api.saveCarrera({
-          id: carreraTUDW.id,
-          nombre: carreraTUDW.nombre,
-          abreviacion: carreraTUDW.abreviacion,
-          aniosDuracion: carreraTUDW.aniosDuracion,
-          materias: carreraTUDW.materias,
-        });
-        queryClient.invalidateQueries({ queryKey: ["carreras", "custom"] });
-        setCarreraActual(carreraTUDW);
-      }
-    } else {
-      setCarreraActual(carreraTUDW);
-    }
-  }, [limpiarLocalStorage, debeUsarBackend, queryClient]);
+  const cargarCarreraTUASSL = useCallback(
+    () => cargarCarreraPredefinida(carreraTUASSL),
+    [cargarCarreraPredefinida],
+  );
+  const cargarCarreraTUDW = useCallback(
+    () => cargarCarreraPredefinida(carreraTUDW),
+    [cargarCarreraPredefinida],
+  );
 
   const importarProgreso = useCallback(
     (file: File) => {
       const reader = new FileReader();
       reader.onload = async (e) => {
         try {
-          const json = JSON.parse(e.target?.result as string);
+          const resultado = CarreraSchema.safeParse(
+            JSON.parse(e.target?.result as string),
+          );
+          if (!resultado.success) {
+            alert("Error: El archivo no tiene un formato válido.");
+            return;
+          }
+          const json = resultado.data;
           limpiarLocalStorage();
           if (debeUsarBackend) {
             // Guardar o sobreescribir la carrera en el back
@@ -319,11 +276,39 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     },
     [limpiarLocalStorage, debeUsarBackend],
   );
-  //Modificar esta mierda para que ande, ahora que se cambiaron las cosas
+
   const exportarProgreso = () => {
     if (!carreraActual) return;
+    const dataExportar = {
+      id: carreraActual.id,
+      nombre: carreraActual.nombre,
+      abreviacion: carreraActual.abreviacion,
+      aniosDuracion: carreraActual.aniosDuracion,
+      materias: carreraActual.materias.map((m) => ({
+        id: m.id,
+        nombre: m.nombre,
+        anio: m.anio,
+        cuatrimestre: m.cuatrimestre,
+        estado:
+          m.estado === "CURSADA" || m.estado === "APROBADA"
+            ? m.estado
+            : "BLOQUEADA",
+        nota: m.nota,
+        anioCursada: m.anioCursada,
+        anioAprobado: m.anioAprobado,
+        correlativasCursada: m.correlativasCursada,
+        correlativasFinal: m.correlativasFinal,
+      })),
+    };
 
-    const dataStr = JSON.stringify(carreraActual, null, 2);
+    const validacion = CarreraSchema.safeParse(dataExportar);
+    if (!validacion.success) {
+      console.error("Error al exportar:", validacion.error);
+      alert("Error interno al exportar. Contactá al desarrollador.");
+      return;
+    }
+
+    const dataStr = JSON.stringify(validacion.data, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
 
@@ -363,8 +348,8 @@ export default function useCarrera(isAuthenticated: boolean, isGuest: boolean) {
     cambiarCarrera,
     cargarCarreraLCC,
     cargarCarreraLSI,
-    cargarTecnicaturaTUASSL,
-    cargarTecnicaturaTUDW,
+    cargarCarreraTUASSL,
+    cargarCarreraTUDW,
     importarProgreso,
     exportarProgreso,
     actualizarMaterias,

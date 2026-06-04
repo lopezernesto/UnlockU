@@ -2,6 +2,9 @@ import type { MateriaData } from "../types/Materia";
 import type { EstadoMateria } from "../types/Materia";
 
 export function recalcularEstados(lista: MateriaData[]): MateriaData[] {
+  // DECISIÓN DE DISEÑO: las materias ya cursadas o aprobadas no se recalculan,
+  // aunque sus correlativas dejen de cumplirse. Esto es intencional para
+  // soportar simulación de escenarios futuros. Ver README para más contexto.
   return lista.map((m) => {
     if (m.estado === "APROBADA" || m.estado === "CURSADA") return { ...m };
 
@@ -27,7 +30,7 @@ export function recalcularEstados(lista: MateriaData[]): MateriaData[] {
         ...m,
         estado: "BLOQUEADA" as EstadoMateria,
         anioCursada: undefined,
-        anioFinal: undefined,
+        anioAprobado: undefined,
         nota: undefined,
       };
     }

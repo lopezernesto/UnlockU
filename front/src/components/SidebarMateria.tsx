@@ -136,7 +136,7 @@ export default function SidebarMateria({ isOpen, onClose }: Props) {
               errorNombre ? "border-red-500/50" : "border-white/10"
             } rounded-xl p-3 mt-3 outline-none focus:border-blue-500/50 text-white placeholder:text-white/10 transition-all`}
           />
-          {/* Mensaje de error */}
+
           {errorNombre && (
             <p className="text-red-400 text-[11px] mt-2 ml-1 animate-pulse">
               {errorNombre}
@@ -304,7 +304,6 @@ export default function SidebarMateria({ isOpen, onClose }: Props) {
         </div>
       </div>
 
-      {/* Boton Guardar */}
       <button
         onClick={handleCrear}
         disabled={!nombre}

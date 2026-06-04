@@ -18,11 +18,14 @@
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
     "express-session": "^1.19.0",
+    "helmet": "^8.2.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.18.0",
-    "prisma": "^6.19.2"
+    "prisma": "^6.19.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/connect-pg-simple": "^7.0.3",

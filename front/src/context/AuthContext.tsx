@@ -1,8 +1,9 @@
 import React, { createContext, useContext } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { type UsuarioAuth } from "../types/Auth";
 
 interface AuthContextType {
-  user: any;
+  user: UsuarioAuth | null | undefined;
   isAuthenticated: boolean;
   isGuest: boolean;
   isLoading: boolean;

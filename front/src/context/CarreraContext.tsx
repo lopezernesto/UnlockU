@@ -5,7 +5,6 @@ import type { MateriaData } from "../types/Materia";
 import { useAuthContext } from "./AuthContext";
 import { recalcularEstados } from "../utils/utils";
 
-// Definimos que datos y funciones estaran disponibles en toda la app
 interface CarreraContextType {
   carreraActual: CarreraData | null;
   materias: MateriaData[];
@@ -72,8 +71,8 @@ export function CarreraProvider({ children }: { children: React.ReactNode }) {
     agregarMateria,
     cargarLCC: carrera.cargarCarreraLCC,
     cargarLSI: carrera.cargarCarreraLSI,
-    cargarTUASSL: carrera.cargarTecnicaturaTUASSL,
-    cargarTUDW: carrera.cargarTecnicaturaTUDW,
+    cargarTUASSL: carrera.cargarCarreraTUASSL,
+    cargarTUDW: carrera.cargarCarreraTUDW,
     cambiarCarrera: carrera.cambiarCarrera,
     importarProgreso: carrera.importarProgreso,
     exportarProgreso: carrera.exportarProgreso,

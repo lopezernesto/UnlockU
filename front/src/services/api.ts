@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:3000";
+import { type UsuarioAuth } from "../types/Auth";
+
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 export const api = {
   // Auth
@@ -13,12 +15,12 @@ export const api = {
     });
   },
 
-  getMe: async () => {
+  getMe: async (): Promise<UsuarioAuth | null> => {
     const res = await fetch(`${API_URL}/auth/me`, {
       credentials: "include",
     });
     if (!res.ok) return null;
-    return res.json();
+    return res.json() as Promise<UsuarioAuth>;
   },
 
   // Progreso
@@ -35,7 +37,8 @@ export const api = {
     materiaId: string;
     estado: "CURSADA" | "APROBADA";
     nota?: number;
-    fecha?: number;
+    anioCursada?: number;
+    anioAprobado?: number;
   }) => {
     const res = await fetch(`${API_URL}/api/progreso`, {
       method: "POST",
@@ -134,7 +137,7 @@ export const api = {
     });
     if (!res.ok) {
       const errorData = await res.json();
-      throw new Error(errorData.error || "Error al crear carrera");
+      throw new Error(JSON.stringify(errorData));
     }
     return res.json();
   },

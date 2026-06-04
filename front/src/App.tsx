@@ -20,14 +20,20 @@ const queryClient = new QueryClient({
 });
 
 function AppContent() {
-  const { user, isAuthenticated, isLoading, login, logout, enableGuestMode } =
-    useAuthContext();
+  const {
+    user,
+    isGuest,
+    isAuthenticated,
+    isLoading,
+    login,
+    logout,
+    enableGuestMode,
+  } = useAuthContext();
 
   const { carreraActual } = useCarreraContext();
 
   const hayCarrera = carreraActual !== null;
 
-  // Pantalla de carga
   if (isLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black">
@@ -36,17 +42,15 @@ function AppContent() {
     );
   }
 
-  // Pantalla de login
   if (!isAuthenticated) {
     return <Login onLogin={login} onGuestAccess={enableGuestMode} />;
   }
 
-  // App principal (usuario logueado)
   return (
     <div
       style={{ width: "100vw", height: "100vh", backgroundColor: "#000000" }}
     >
-      <PanelUsuario user={user} onLogout={logout} />
+      <PanelUsuario user={user} isGuest={isGuest} onLogout={logout} />
       {!hayCarrera && <MensajeBienvenida />}
 
       {hayCarrera && <Header />}
