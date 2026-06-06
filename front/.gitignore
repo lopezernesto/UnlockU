@@ -13,6 +13,7 @@ dist-ssr
 *.local
 src/components/nota.tsx
 src/components/Arcos.tsx
+.env
 src/App.css
 #src/data/MateriasIniciales.ts
 # Editor directories and files
