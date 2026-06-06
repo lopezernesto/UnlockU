@@ -14,7 +14,7 @@ dist-ssr
 src/components/nota.tsx
 src/components/Arcos.tsx
 src/App.css
-
+#src/data/MateriasIniciales.ts
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
