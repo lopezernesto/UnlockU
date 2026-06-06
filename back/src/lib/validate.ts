@@ -26,7 +26,7 @@ export function validateParam(
     return null;
   }
 
-  const result = schema.safeParse(value);
+  const result = schema.safeParse(normalized);
   if (!result.success) {
     res.status(400).json({ error: "Parámetro inválido" });
     return null;

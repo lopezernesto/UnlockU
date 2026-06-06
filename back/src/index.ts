@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 const PgSession = connectPgSimple(session);
 const pgPool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 2,
+  max: 5,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
