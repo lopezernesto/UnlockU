@@ -2,15 +2,17 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+RUN npx pnpm@latest-11 dlx @pnpm/exe@latest-11 setup
+
 COPY package*.json ./
 COPY prisma ./prisma/
 
-RUN npm install
-RUN npm prisma generate
+RUN pnpm install
+RUN pnpm prisma generate
 
 COPY . .
 
 EXPOSE 3000
 
-CMD ["npm", "build"]
-CMD ["npm", "start"]
+CMD ["pnpm", "build"]
+CMD ["pnpm", "start"]
