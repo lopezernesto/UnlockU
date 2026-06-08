@@ -48,6 +48,7 @@ services:
       - postgres_db
     volumes:
       - ./back:/app
+      - /usr/src/app/node_modules
       
 volumes:
   postgres_data:
