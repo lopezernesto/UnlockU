@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: mi_postgres_container
+    restart: always
+    environment:
+      POSTGRES_USER: mi_usuario
+      POSTGRES_PASSWORD: mi_password_seguro
+      POSTGRES_DB: mi_base_de_datos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: mi_pgadmin_container
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@correo.com
+      PGADMIN_DEFAULT_PASSWORD: admin_password
+    ports:
+      - "8088:80"
+    depends_on:
+      - postgres_db
+
+  app: 
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: mi_app_container
+    restart: always
+    ports:
+      - "8080:3000"
+    depends_on:
+      - postgres_db
+    volumes:
+      - ./back:/app
+      
+volumes:
+  postgres_data:
