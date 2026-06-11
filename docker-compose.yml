@@ -33,22 +33,24 @@ services:
     container_name: mi_app_container
     restart: always
     ports:
-      - "8080:3000"
+      - "3000:3000"
     environment:
       NODE_ENV: development
-      PORT: 8080
-      DATABASE_URL: postgresql://mi_usuario:mi_password_seguro@localhost:5432/unlocku
+      PORT: 3000
+      DATABASE_URL: 
       GOOGLE_CLIENT_ID: ""
       GOOGLE_CLIENT_SECRET: ""
       SESSION_SECRET: "una_frase_larga_y_random_cualquiera"
-      FRONTEND_URL: https://unlock-u.vercel.app/
-      BACKEND_URL: http://cefai.fi.uncoma.edu.ar:8080
-      BACKEND_CALLBACK: http://cefai.fi.uncoma.edu.ar
+      FRONTEND_URL: https://unlock-u.vercel.app
+      BACKEND_URL: http://back-cefai.fi.uncoma.edu.ar/
+      BACKEND_CALLBACK: http://back-cefai.fi.uncoma.edu.ar/
     depends_on:
       - postgres_db
     volumes:
       - ./back:/app
       - /app/node_modules
-      
+
+    
 volumes:
   postgres_data:
+

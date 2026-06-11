@@ -1,16 +1,15 @@
-FROM node:26-alpine3.22
+FROM node:22-alpine
 
 WORKDIR /app
 
-RUN npx pnpm@latest-11 dlx @pnpm/exe@latest-11 setup
-
-COPY package*.json ./
-COPY prisma ./prisma/
-
-RUN pnpm install
-RUN pnpm prisma generate
-
 COPY . .
+
+RUN corepack enable && corepack prepare pnpm@11.5.2 --activate
+
+COPY package*.json pnpm-lock.yaml ./
+
+# Instalar dependencias con el archivo .npmrc ya configurado
+RUN pnpm install --frozen-lockfile
 
 EXPOSE 3000
 
