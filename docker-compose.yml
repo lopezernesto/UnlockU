@@ -13,6 +13,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - unlocku-red
 
   pgadmin:
     image: dpage/pgadmin4
@@ -25,8 +27,10 @@ services:
       - "8088:80"
     depends_on:
       - postgres_db
+    networks:
+      - unlocku-red
 
-  app: 
+  app:
     build:
       context: ./back
       dockerfile: Dockerfile
@@ -42,15 +46,30 @@ services:
       GOOGLE_CLIENT_SECRET: ""
       SESSION_SECRET: "una_frase_larga_y_random_cualquiera"
       FRONTEND_URL: https://unlock-u.vercel.app
-      BACKEND_URL: http://back-cefai.fi.uncoma.edu.ar/
-      BACKEND_CALLBACK: http://back-cefai.fi.uncoma.edu.ar/
+      BACKEND_URL: http://back-cefai.fi.uncoma.edu.ar
+      BACKEND_CALLBACK: http://back-cefai.fi.uncoma.edu.ar
     depends_on:
       - postgres_db
     volumes:
       - ./back:/app
       - /app/node_modules
+    networks:
+      - unlocku-red
 
-    
+  vite-app:
+    container_name: front_unlocku
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80" # Podrás acceder desde tu navegador en http://localhost:8080
+    restart: always
+    environment: 
+      VITE_BACKEND_URL: http://back-cefai.fi.uncoma.edu.ar
+
+networks:
+  unlocku-red:
+    driver: bridge
+
 volumes:
   postgres_data:
-
