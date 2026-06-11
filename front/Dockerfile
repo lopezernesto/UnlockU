@@ -9,6 +9,11 @@ RUN corepack enable && corepack prepare pnpm@11.5.2 --activate
 
 COPY package*.json pnpm-lock.yaml ./
 
+# 1. Declaramos que esperamos el argumento de construcción
+ARG VITE_API_URL
+# 2. Lo asignamos como variable de entorno para el proceso de Node/Vite
+ENV VITE_API_URL=$VITE_API_URL
+
 # Instalar dependencias con el archivo .npmrc ya configurado
 RUN pnpm install --frozen-lockfile
 

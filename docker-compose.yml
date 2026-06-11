@@ -45,7 +45,7 @@ services:
       GOOGLE_CLIENT_ID: ""
       GOOGLE_CLIENT_SECRET: ""
       SESSION_SECRET: "una_frase_larga_y_random_cualquiera"
-      FRONTEND_URL: https://unlock-u.vercel.app
+      FRONTEND_URL: http://cefai.fi.uncoma.edu.ar
       BACKEND_URL: http://back-cefai.fi.uncoma.edu.ar
       BACKEND_CALLBACK: http://back-cefai.fi.uncoma.edu.ar
     depends_on:
@@ -61,6 +61,8 @@ services:
     build:
       context: ./front
       dockerfile: Dockerfile
+      args: 
+        - VITE_API_URL=http://cefai.fi.uncoma.edu.ar
     ports:
       - "8080:80" # Podrás acceder desde tu navegador en http://localhost:8080
     restart: always
