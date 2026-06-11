@@ -65,7 +65,7 @@ services:
       - "8080:80" # Podrás acceder desde tu navegador en http://localhost:8080
     restart: always
     environment: 
-      VITE_BACKEND_URL: http://back-cefai.fi.uncoma.edu.ar
+      VITE_API_URL: http://back-cefai.fi.uncoma.edu.ar
 
 networks:
   unlocku-red:
